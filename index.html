@@ -1,0 +1,698 @@
+<!--
+ * @Version: 1.0
+ * @Autor: 兰田 Lambert_work@163.com
+ * @Date: 2025-05-30 22:00:16
+ * @LastEditors: lambertlt lambert_Y_Y@163.com
+ * @LastEditTime: 2025-05-31 03:16:15
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            padding: 20px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            background: url('https://q0.itc.cn/q_70/images03/20240530/c847cfb512824f48b32e3a39476db96f.gif') no-repeat center center fixed;
+            /* 使用你选择的背景图片 */
+            background-size: cover;
+        }
+
+
+        .diary-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .glassmorphic-panel {
+
+            backdrop-filter: blur(10px);
+            /* 调整blur值以改变模糊程度 */
+            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.3);
+            /* 半透明背景色 */
+            border-radius: 15px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            /* 添加柔和的阴影增加层次感 */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* 边框颜色与透明度 */
+            padding: 30px;
+            width: 100%;
+            min-height: calc(100vh - 60px);
+            color: #333;
+            /* 文字颜色 */
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* 可选：为标题和其他文本元素添加额外样式 */
+        .glassmorphic-panel h2 {
+            color: #5a5a5a;
+            margin-bottom: 15px;
+        }
+
+
+        /* 三个操作按钮 */
+        .file-input {
+            color: rgba(255, 0, 0, 0) !important;
+            width: 103px;
+        }
+
+        .glass-button {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            margin: 10px 10px 0 0;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 所有按钮的基础 hover 效果 */
+        .glass-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .glass-button:active {
+            transform: scale(0.98);
+        }
+
+        /* 不同功能按钮使用不同渐变色（可选） */
+
+        .btn-import {
+            background-image: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+        }
+
+        .btn-export {
+            background-image: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
+        }
+
+        .file-input::file-selector-button,
+        .file-input:focus::file-selector-button {
+            background-image: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            border: none;
+            border-radius: 30px;
+            padding: 5px 12px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input::file-selector-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 日记列表样式 */
+
+        /* 适用于需要限制为两行显示的元素 */
+        .two-line-clamp {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            /* 设置你希望的最大行数 */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+            /* 允许文本换行 */
+            line-height: 1.5em;
+            /* 根据你的字体大小调整 */
+            max-height: 3em;
+            /* 行高乘以最大行数 */
+        }
+
+        .diary-list {
+            /* max-width: 900px; */
+            margin: 50px auto;
+            padding: 20px;
+            font-family: "Segoe UI", sans-serif;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            /* 毛玻璃背景 */
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .empty {
+            text-align: center;
+            color: #ddd;
+            font-style: italic;
+            margin-top: 20px;
+        }
+
+        .glassmorphic-card {
+            backdrop-filter: blur(10px);
+            /* 卡片毛玻璃效果 */
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .glassmorphic-card:hover {
+            transform: scale(1.02);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .date {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .content {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .tag {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            text-align: center;
+            min-width: 100px;
+            background-size: 400% 400%;
+            transition: background 0.4s ease;
+        }
+
+        .mood {
+            background-image: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        }
+
+        .weather {
+            background-image: linear-gradient(135deg, #a18cd1, #fbc2eb);
+        }
+
+        .location {
+            background-image: linear-gradient(135deg, #84fab0, #8fd3f4);
+        }
+
+        .tag-label {
+            background-image: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+        }
+
+        .time {
+            background-image: linear-gradient(135deg, #8ec5fc, #e0c3fc);
+        }
+
+        .tag:hover {
+            transform: scale(1.05);
+        }
+
+        /* 新增日记面板 */
+        .overlay {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: -21px;
+            left: -21px;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* 半透明黑色背景，使底层内容变暗 */
+            backdrop-filter: blur(4px);
+            /* 可选：给底层内容添加模糊效果 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            /* 确保在最顶层 */
+        }
+
+        .glass-form-panel button {
+            color: #333;
+            background: rgb(0 131 255 / 43%);
+        }
+
+        .form-panel {
+            background-color: #ffffff;
+            /* 白色背景，清晰易读 */
+            border-radius: 16px;
+            padding: 30px;
+            width: 90vw;
+            height: 95vh;
+            /* 自适应宽度 */
+            max-width: 600px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            /* 加深阴影，增强悬浮感 */
+            color: #333;
+            /* 深色文字，对比度高 */
+            position: relative;
+            /* 确保内部元素相对于此定位 */
+            z-index: 1001;
+            /* 确保面板在覆盖层之上 */
+            overflow: auto;
+        }
+
+        .form-panel h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #444;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 14px;
+            background-color: #fff;
+            color: #333;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #a6c1ee;
+            background-color: #f0f6ff;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-row .half {
+            flex: 1;
+            min-width: calc(50% - 10px);
+        }
+
+        /* 日记详情 */
+
+        .diary-details p {
+            margin-bottom: 10px;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .diary-details strong {
+            display: inline-block;
+            width: 120px;
+            /* 设置宽度以对齐文本 */
+            font-weight: bold;
+        }
+
+        .diary-details img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        /* 复选框radio */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-left: 28px;
+            cursor: pointer;
+            font-size: 14px;
+            user-select: none;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="diary-container">
+            <template v-if="readDetailDiaryFlag">
+                <div class="glassmorphic-panel">
+                    <h2>日记详情</h2>
+                    <svg @click="()=>{readDetailDiaryFlag=false;selectDetailIndex=null;selectDetailRadioList = [];}"
+                        style="width: 50px;height: 50px;position: absolute;right: 20px;top: 20px;" t="1748630408558"
+                        class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                        p-id="5220" width="200" height="200">
+                        <path
+                            d="M302.349474 226.196211L512 435.792842l209.650526-209.650526 76.153263 76.261052L588.207158 512l209.650526 209.650526-76.261052 76.153263L512 588.207158l-209.650526 209.650526-76.153263-76.261052L435.792842 512l-209.650526-209.650526 76.261052-76.153263z"
+                            fill="#FFA833" p-id="5221"></path>
+                    </svg>
+                    <svg @click="()=>{jsonData.splice(selectDetailIndex,1);readDetailDiaryFlag=false;}"
+                        style="width: 30px;height: 30px;position: absolute;right: 70px;top: 28px;" t="1748632122601"
+                        class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                        p-id="6211" width="200" height="200">
+                        <path
+                            d="M519.620465 0c-103.924093 0-188.511256 82.467721-192.083349 185.820279H85.015814A48.91386 48.91386 0 0 0 36.101953 234.686512a48.91386 48.91386 0 0 0 48.913861 48.866232h54.010046V831.345116c0 102.852465 69.822512 186.844279 155.909954 186.844279h439.200744c86.087442 0 155.909953-83.491721 155.909954-186.844279V284.100465h48.91386a48.91386 48.91386 0 0 0 48.913861-48.890046 48.91386 48.91386 0 0 0-48.913861-48.866233h-227.756651A191.559442 191.559442 0 0 0 519.620465 0z m-107.234232 177.080558c3.548279-49.771163 46.627721-88.540279 99.851907-88.540279 53.224186 0 96.327442 38.745302 99.351813 88.540279h-199.20372z m-111.997024 752.044651c-30.981953 0-65.083535-39.15014-65.083535-95.041488V287.744h575.488v546.839814c0 55.915163-34.077767 95.041488-65.059721 95.041488H300.389209v-0.500093z"
+                            fill="#D81E06" p-id="6212"></path>
+                        <path
+                            d="M368.116093 796.814884c24.361674 0 44.27014-21.670698 44.27014-48.818605v-278.623256c0-27.147907-19.908465-48.818605-44.27014-48.818604-24.33786 0-44.27014 21.670698-44.27014 48.818604v278.623256c0 27.147907 19.360744 48.818605 44.293954 48.818605z m154.933581 0c24.361674 0 44.293953-21.670698 44.293954-48.818605v-278.623256c0-27.147907-19.932279-48.818605-44.293954-48.818604-24.33786 0-44.27014 21.670698-44.270139 48.818604v278.623256c0 27.147907 19.932279 48.818605 44.293953 48.818605z m132.810419 0c24.33786 0 44.27014-21.670698 44.27014-48.818605v-278.623256c0-27.147907-19.932279-48.818605-44.27014-48.818604s-44.27014 21.670698-44.27014 48.818604v278.623256c0 27.147907 19.360744 48.818605 44.27014 48.818605z"
+                            fill="#D81E06" p-id="6213"></path>
+                    </svg>
+                    <!-- 假设 diary 是你的日记对象 -->
+                    <div class="diary-details">
+                        <p><strong>日期：</strong>{{ jsonData[selectDetailIndex].日期 }}</p>
+                        <p><strong>标题：</strong>{{ jsonData[selectDetailIndex].标题 }}</p>
+                        <p><strong>内容：</strong>{{ jsonData[selectDetailIndex].内容 }}</p>
+                        <p><strong>心情：</strong>{{ jsonData[selectDetailIndex].心情 || '无' }}</p>
+                        <p>
+                            <strong>待办事项：</strong>
+                        <div class="radio-group">
+                            <ol v-for="(item, index) in selectDetailRadioList" :key="index">
+                                <label class="radio-item">
+                                    <input type="checkbox" :checked="item.checked" v-model="item.checked"
+                                        @change="(e)=>{console.log(e.target.checked,index);}" />
+                                    <span class="checkmark">{{ item.value }}</span>
+                                </label>
+                            </ol>
+                        </div>
+                        <!-- {{ jsonData[selectDetailIndex].待办事项 || '无' }} -->
+                        </p>
+                        <p><strong>事项记录：</strong>{{ jsonData[selectDetailIndex].事项记录 || '无' }}</p>
+                        <p><strong>天气：</strong>{{ jsonData[selectDetailIndex].天气 || '无' }}</p>
+                        <p><strong>位置：</strong>{{ jsonData[selectDetailIndex].位置 || '无' }}</p>
+                        <p><strong>标签：</strong>{{ jsonData[selectDetailIndex].标签 || '无' }}</p>
+                        <p><strong>图片：</strong><img :src="jsonData[selectDetailIndex].图片" alt="日记图片"
+                                v-if="jsonData[selectDetailIndex].图片" /></p>
+                        <p><strong>封面：</strong><img :src="jsonData[selectDetailIndex].封面" alt="日记封面"
+                                v-if="jsonData[selectDetailIndex].封面" /></p>
+                        <p><strong>最后修改时间：</strong>{{ jsonData[selectDetailIndex].最后修改时间 || '无' }}</p>
+                    </div>
+                </div>
+            </template>
+            <template v-else>
+                <div class="glassmorphic-panel">
+                    <h2>记录美好当下</h2>
+                    <input type="file" id="fileInput" @change="handleFileUpload" accept=".xlsx, .xls"
+                        class="glass-button file-input" />
+
+                    <button class="glass-button btn-import" @click="() => { addDiaryFlag = !addDiaryFlag }">
+                        {{ addDiaryFlag ? '取消新增' : '新增日记' }}
+                    </button>
+
+                    <button class="glass-button btn-export"
+                        @click="exportExcelJsonArray(jsonData, `${new Date().getFullYear()}_${new Date().getMonth()+1}月日记.xlsx`)">
+                        保存Excel
+                    </button>
+                    <!-- 历史日记展示 -->
+                    <div class="diary-list">
+                        <div v-if="jsonData.length === 0" class="empty">暂无日记</div>
+                        <div v-for="(item, index) in jsonData" :key="index" class="glassmorphic-card"
+                            @click="() => {selectDetailIndex=index;readDetailDiaryFlag=true;selectDetailRadioList = item.待办事项.split('，').map(e=>{return {value:e,checked:false}});}">
+                            <div class=" card-header">
+                                <h3>{{ item.标题 }}</h3>
+                                <span class="date">{{ item.日期 }}</span>
+                            </div>
+                            <p class="content two-line-clamp">{{ item.内容 }}</p>
+                            <div class="info">
+                                <span class="tag mood">心情：{{ item.心情 || '无' }}</span>
+                                <span class="tag weather">天气：{{ item.天气 || '无' }}</span>
+                                <span class="tag location">位置：{{ item.位置 || '无' }}</span>
+                                <span class="tag tag-label">标签：{{ item.标签 || '无' }}</span>
+                                <span class="tag time">最后修改时间：{{ item.最后修改时间 || '无' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 新增日记 -->
+                    <div v-if="diary && addDiaryFlag" class="glass-form-panel overlay">
+                        <div class="form-panel">
+                            <h3>新增日记</h3>
+
+                            <div class="form-group">
+                                <label>日期：</label>
+                                <input v-model="diary.日期" type="date" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>标题：</label>
+                                <input v-model="diary.标题" placeholder="请输入标题" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>内容：</label>
+                                <textarea v-model="diary.内容" rows="5" placeholder="写下今天的心情..."></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>心情：</label>
+                                    <select v-model="diary.心情">
+                                        <option value="">请选择</option>
+                                        <option value="开心">开心</option>
+                                        <option value="难过">难过</option>
+                                        <option value="平静">平静</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group half">
+                                    <label>天气：</label>
+                                    <select v-model="diary.天气">
+                                        <option value="">请选择</option>
+                                        <option value="晴">晴</option>
+                                        <option value="雨">雨</option>
+                                        <option value="阴">阴</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>待办事项：</label>
+                                    <input v-model="diary.待办事项" placeholder="如：买菜、开会" />
+                                </div>
+
+                                <div class="form-group half">
+                                    <label>事项记录：</label>
+                                    <input v-model="diary.事项记录" placeholder="如：已完成" />
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>位置：</label>
+                                    <input v-model="diary.位置" placeholder="如：上海" />
+                                </div>
+
+                                <div class="form-group half">
+                                    <label>标签：</label>
+                                    <input v-model="diary.标签" placeholder="多个标签用逗号分隔" />
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>图片地址：</label>
+                                    <input v-model="diary.图片" placeholder="可选" />
+                                </div>
+
+                                <div class="form-group half">
+                                    <label>封面地址：</label>
+                                    <input v-model="diary.封面" placeholder="可选" />
+                                </div>
+                            </div>
+
+                            <span style="position: absolute;right: 20px;top: 20px;">
+                                <button class="glass-button btn-submit" @click="()=>{
+                addDiaryFlag = !addDiaryFlag
+                diary = {
+                    日期: '',
+                    标题: '',
+                    内容: '',
+                    心情: '',
+                    待办事项: '',
+                    事项记录: '',
+                    天气: '',
+                    位置: '',
+                    标签: '',
+                    图片: '',
+                    封面: '',
+                    最后修改时间:''
+                }
+                        }">取消</button>
+                                <button class="glass-button btn-submit" @click="()=>{
+                diary.最后修改时间 = new Date().toLocaleString()
+                jsonData.push(diary)
+                addDiaryFlag = !addDiaryFlag
+                diary = {
+                    日期: '',
+                    标题: '',
+                    内容: '',
+                    心情: '',
+                    待办事项: '',
+                    事项记录: '',
+                    天气: '',
+                    位置: '',
+                    标签: '',
+                    图片: '',
+                    封面: '',
+                    最后修改时间:''
+                }
+            }">
+                                    提交
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const message = ref('欢迎使用 Excel 解析器');
+                const addDiaryFlag = ref(false);
+                const readDetailDiaryFlag = ref(false);
+                const selectDetailIndex = ref(null);
+                const selectDetailRadioList = ref([]);
+                const diary = ref({
+                    日期: '',
+                    标题: '',
+                    内容: '',
+                    心情: '',
+                    待办事项: '',
+                    事项记录: '',
+                    天气: '',
+                    位置: '',
+                    标签: '',
+                    图片: '',
+                    封面: '',
+                    最后修改时间: ''
+                });
+                const jsonData = ref([]); // 存储解析后的 JSON 数据
+
+                // 处理文件上传事件
+                const handleFileUpload = (event) => {
+                    console.log('handleFileUpload', event.target.files);
+                    const file = event.target.files[0];
+                    const fileName = file.name;
+                    if (!file) return;
+
+                    // 使用 FileReader 读取文件内容
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        console.log(ev);
+
+                        try {
+                            const data = new Uint8Array(ev.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            // 获取第一个工作表名称
+                            const firstSheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[firstSheetName];
+
+                            // 方式一：将 Excel 表格转为对象数组（适合有标题行的情况）
+                            const jsonArray = XLSX.utils.sheet_to_json(worksheet);
+
+                            // 方式二：将 Excel 表格转为二维数组（适合无标题或需要保留全部数据）
+                            const arrayData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                            jsonData.value = jsonArray; // 更新响应式数据
+                            console.log('jsonData', jsonData.value);
+                            // exportExcelJsonArray(jsonArray)
+                            document.getElementById('fileInput').value = '';
+                        } catch (error) {
+                            console.log('文件解析失败，请确保是有效的 Excel 文件');
+                            console.error(error);
+                        }
+                    };
+
+                    reader.readAsArrayBuffer(file);
+                };
+                function exportExcelJsonArray(list, filename = "我的日记.xlsx") {
+                    const worksheet = XLSX.utils.json_to_sheet(list);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "日记");
+                    XLSX.writeFile(workbook, filename);
+                }
+                function exportExcelArray(list, filename = "我的日记.xlsx") {
+                    const worksheet = XLSX.utils.aoa_to_sheet(list);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "日记");
+                    XLSX.writeFile(workbook, filename);
+                }
+                return {
+                    message,
+                    jsonData,
+                    diary,
+                    selectDetailIndex,
+                    addDiaryFlag,
+                    readDetailDiaryFlag,
+                    selectDetailRadioList,
+                    handleFileUpload,
+                    exportExcelJsonArray,
+                    exportExcelArray
+                };
+            }
+        }).mount('#app');
+
+
+    </script>
+</body>
+
+</html>
