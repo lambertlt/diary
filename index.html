@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-05-31 03:16:15
+ * @LastEditTime: 2025-05-31 03:46:01
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -69,12 +69,12 @@
         /* 三个操作按钮 */
         .file-input {
             color: rgba(255, 0, 0, 0) !important;
-            width: 103px;
+            width: 92px;
         }
 
         .glass-button {
             display: inline-block;
-            padding: 6px 10px;
+            padding: 6px 8px;
             border-radius: 30px;
             font-size: 14px;
             font-weight: 600;
@@ -115,7 +115,7 @@
             background-image: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
             border: none;
             border-radius: 30px;
-            padding: 5px 12px;
+            padding: 3px 8px;
             color: white;
             font-size: 15px;
             font-weight: 600;
@@ -384,6 +384,31 @@
             user-select: none;
             color: #555;
         }
+
+        /* 当视口宽度小于425px时应用的样式 */
+        @media only screen and (max-width: 425px) {
+            body {
+                padding: 10px;
+            }
+
+            .glassmorphic-panel {
+                padding: 10px;
+            }
+
+            .overlay {
+                width: auto;
+                height: auto;
+                position: fixed;
+                top: 0;
+                left: -2px;
+            }
+
+            .form-panel {
+                border-radius: 0;
+                padding: 10px;
+                width: 96vw;
+            }
+        }
     </style>
 </head>
 
@@ -554,7 +579,8 @@
                                 </div>
                             </div>
 
-                            <span style="position: absolute;right: 20px;top: 20px;">
+                            <div
+                                style="position: absolute;right: 0;top: 10px;width: 100%;display: flex;justify-content: space-between;padding: 0 10px;">
                                 <button class="glass-button btn-submit" @click="()=>{
                 addDiaryFlag = !addDiaryFlag
                 diary = {
@@ -593,7 +619,7 @@
             }">
                                     提交
                                 </button>
-                            </span>
+                            </div>
                         </div>
                     </div>
                 </div>
