@@ -698,11 +698,11 @@
                             const worksheet = workbook.Sheets[firstSheetName];
 
                             // 方式一：将 Excel 表格转为对象数组（适合有标题行的情况）
-                            const jsonArray = XLSX.utils.sheet_to_json(worksheet);
+                            let jsonArray = XLSX.utils.sheet_to_json(worksheet);
 
                             // 方式二：将 Excel 表格转为二维数组（适合无标题或需要保留全部数据）
-                            const arrayData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
+                            //const arrayData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+							jsonArray = jsonArray.map(e=>{e.最后修改时间=getFormatDate_XLSX(e.最后修改时间);e.日期=getFormatDate_XLSX(e.日期);return e})
                             jsonData.value = jsonArray; // 更新响应式数据
                             console.log('jsonData', jsonData.value);
                             // exportExcelJsonArray(jsonArray)
@@ -728,6 +728,23 @@
                     XLSX.utils.book_append_sheet(workbook, worksheet, "日记");
                     XLSX.writeFile(workbook, filename);
                 }
+				//将excel的日期格式转成Date()对象;
+				function getFormatDate_XLSX(serial) {
+					if(!Number.isInteger(serial))
+						return serial
+					var utc_days = Math.floor(serial - 25569);
+					var utc_value = utc_days * 86400;
+					var date_info = new Date(utc_value * 1000);
+					var fractional_day = serial - Math.floor(serial) + 0.0000001;
+					var total_seconds = Math.floor(86400 * fractional_day);
+					var seconds = total_seconds % 60;
+					total_seconds -= seconds;
+					var hours = Math.floor(total_seconds / (60 * 60));
+					var minutes = Math.floor(total_seconds / 60) % 60;
+					var d = new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
+					return d.toLocaleString();
+				}
+				
                 return {
                     message,
                     jsonData,
@@ -737,7 +754,8 @@
                     readDetailDiaryFlag,
                     handleFileUpload,
                     exportExcelJsonArray,
-                    exportExcelArray
+                    exportExcelArray,
+					getFormatDate_XLSX
                 };
             }
         }).mount('#app');
