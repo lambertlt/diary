@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-05-31 03:46:01
+ * @LastEditTime: 2025-06-02 19:13:19
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -385,6 +385,10 @@
             color: #555;
         }
 
+        .checkmark {
+            padding-left: 5px;
+        }
+
         /* 当视口宽度小于425px时应用的样式 */
         @media only screen and (max-width: 425px) {
             body {
@@ -416,9 +420,10 @@
     <div id="app">
         <div class="diary-container">
             <template v-if="readDetailDiaryFlag">
+                <!-- 日记详情 -->
                 <div class="glassmorphic-panel">
                     <h2>日记详情</h2>
-                    <svg @click="()=>{readDetailDiaryFlag=false;selectDetailIndex=null;selectDetailRadioList = [];}"
+                    <svg @click="()=>{readDetailDiaryFlag=false;selectDetailIndex=null;}"
                         style="width: 50px;height: 50px;position: absolute;right: 20px;top: 20px;" t="1748630408558"
                         class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
                         p-id="5220" width="200" height="200">
@@ -446,17 +451,32 @@
                         <p>
                             <strong>待办事项：</strong>
                         <div class="radio-group">
-                            <ol v-for="(item, index) in selectDetailRadioList" :key="index">
-                                <label class="radio-item">
-                                    <input type="checkbox" :checked="item.checked" v-model="item.checked"
-                                        @change="(e)=>{console.log(e.target.checked,index);}" />
-                                    <span class="checkmark">{{ item.value }}</span>
-                                </label>
-                            </ol>
+                            <template v-for="(item, index) in JSON.parse(jsonData[selectDetailIndex].待办事项)"
+                                :key="index">
+                                <ol v-if="item.value!=''">
+                                    <label class="radio-item">
+                                        <input type="checkbox" :checked="item.checked" v-model="item.checked" @change="(e)=>{console.log(e.target.checked,index);
+                                               let i = JSON.parse(jsonData[selectDetailIndex].待办事项)
+                                               i[index].checked=e.target.checked
+                                               jsonData[selectDetailIndex].待办事项=JSON.stringify(i)
+                                            }" />
+                                        <span class="checkmark">{{ item.value }}</span>
+                                    </label>
+                                </ol>
+                            </template>
                         </div>
-                        <!-- {{ jsonData[selectDetailIndex].待办事项 || '无' }} -->
                         </p>
-                        <p><strong>事项记录：</strong>{{ jsonData[selectDetailIndex].事项记录 || '无' }}</p>
+                        <p>
+                            <strong>事项记录：</strong>
+                        <div class="radio-group">
+                            <template v-for="(item, index) in JSON.parse(jsonData[selectDetailIndex].事项记录)"
+                                :key="index">
+                                <ol v-if="item!=''" style="padding-left: 28px;">
+                                    {{ item }}
+                                </ol>
+                            </template>
+                        </div>
+                        </p>
                         <p><strong>天气：</strong>{{ jsonData[selectDetailIndex].天气 || '无' }}</p>
                         <p><strong>位置：</strong>{{ jsonData[selectDetailIndex].位置 || '无' }}</p>
                         <p><strong>标签：</strong>{{ jsonData[selectDetailIndex].标签 || '无' }}</p>
@@ -486,7 +506,7 @@
                     <div class="diary-list">
                         <div v-if="jsonData.length === 0" class="empty">暂无日记</div>
                         <div v-for="(item, index) in jsonData" :key="index" class="glassmorphic-card"
-                            @click="() => {selectDetailIndex=index;readDetailDiaryFlag=true;selectDetailRadioList = item.待办事项.split('，').map(e=>{return {value:e,checked:false}});}">
+                            @click="() => {selectDetailIndex=index;readDetailDiaryFlag=true;}">
                             <div class=" card-header">
                                 <h3>{{ item.标题 }}</h3>
                                 <span class="date">{{ item.日期 }}</span>
@@ -536,9 +556,10 @@
                                     <label>天气：</label>
                                     <select v-model="diary.天气">
                                         <option value="">请选择</option>
+                                        <option value="阴">阴</option>
                                         <option value="晴">晴</option>
                                         <option value="雨">雨</option>
-                                        <option value="阴">阴</option>
+                                        <option value="阴">雪</option>
                                     </select>
                                 </div>
                             </div>
@@ -546,12 +567,12 @@
                             <div class="form-row">
                                 <div class="form-group half">
                                     <label>待办事项：</label>
-                                    <input v-model="diary.待办事项" placeholder="如：买菜、开会" />
+                                    <textarea v-model="diary.待办事项" rows="5" placeholder="如：买菜、开会..."></textarea>
                                 </div>
 
                                 <div class="form-group half">
                                     <label>事项记录：</label>
-                                    <input v-model="diary.事项记录" placeholder="如：已完成" />
+                                    <textarea v-model="diary.事项记录" rows="5" placeholder="如：已完成..."></textarea>
                                 </div>
                             </div>
 
@@ -600,6 +621,11 @@
                         }">取消</button>
                                 <button class="glass-button btn-submit" @click="()=>{
                 diary.最后修改时间 = new Date().toLocaleString()
+                diary.待办事项 = diary.待办事项.split('\n').map(e=>{return {value:e,checked:false}})
+                diary.事项记录 = diary.事项记录.split('\n')
+                diary.事项记录 = JSON.stringify(diary.事项记录)
+                diary.待办事项 = JSON.stringify(diary.待办事项)
+                console.log(diary)
                 jsonData.push(diary)
                 addDiaryFlag = !addDiaryFlag
                 diary = {
@@ -636,7 +662,6 @@
                 const addDiaryFlag = ref(false);
                 const readDetailDiaryFlag = ref(false);
                 const selectDetailIndex = ref(null);
-                const selectDetailRadioList = ref([]);
                 const diary = ref({
                     日期: '',
                     标题: '',
@@ -691,6 +716,7 @@
                     reader.readAsArrayBuffer(file);
                 };
                 function exportExcelJsonArray(list, filename = "我的日记.xlsx") {
+                    console.log(list);
                     const worksheet = XLSX.utils.json_to_sheet(list);
                     const workbook = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(workbook, worksheet, "日记");
@@ -709,7 +735,6 @@
                     selectDetailIndex,
                     addDiaryFlag,
                     readDetailDiaryFlag,
-                    selectDetailRadioList,
                     handleFileUpload,
                     exportExcelJsonArray,
                     exportExcelArray
