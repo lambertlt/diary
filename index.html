@@ -25,7 +25,6 @@
             width: 100vw;
             min-height: 100vh;
             padding: 20px;
-            font-family: Arial, Helvetica, sans-serif;
             font-size: 14px;
             background: url('https://q0.itc.cn/q_70/images03/20240530/c847cfb512824f48b32e3a39476db96f.gif') no-repeat center center fixed;
             /* 使用你选择的背景图片 */
@@ -55,8 +54,6 @@
             width: 100%;
             min-height: calc(100vh - 60px);
             color: #333;
-            /* 文字颜色 */
-            font-family: 'Arial', sans-serif;
         }
 
         /* 可选：为标题和其他文本元素添加额外样式 */
@@ -150,7 +147,6 @@
             /* max-width: 900px; */
             margin: 50px auto;
             padding: 20px;
-            font-family: "Segoe UI", sans-serif;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             /* 毛玻璃背景 */
@@ -625,8 +621,9 @@
                 diary.事项记录 = diary.事项记录.split('\n')
                 diary.事项记录 = JSON.stringify(diary.事项记录)
                 diary.待办事项 = JSON.stringify(diary.待办事项)
-                console.log(diary)
-                jsonData.push(diary)
+                //console.log(diary)
+                //jsonData.push(diary)
+				jsonData=[diary,...jsonData]
                 addDiaryFlag = !addDiaryFlag
                 diary = {
                     日期: '',
@@ -703,6 +700,7 @@
                             // 方式二：将 Excel 表格转为二维数组（适合无标题或需要保留全部数据）
                             //const arrayData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 							jsonArray = jsonArray.map(e=>{e.最后修改时间=getFormatDate_XLSX(e.最后修改时间);e.日期=getFormatDate_XLSX(e.日期);return e})
+							jsonArray.reverse()
                             jsonData.value = jsonArray; // 更新响应式数据
                             console.log('jsonData', jsonData.value);
                             // exportExcelJsonArray(jsonArray)
