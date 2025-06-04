@@ -700,7 +700,13 @@
                             // 方式二：将 Excel 表格转为二维数组（适合无标题或需要保留全部数据）
                             //const arrayData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 							jsonArray = jsonArray.map(e=>{e.最后修改时间=getFormatDate_XLSX(e.最后修改时间);e.日期=getFormatDate_XLSX(e.日期);return e})
-							jsonArray.reverse()
+							//jsonArray.reverse()
+							// 按照 "日期" 排序（升序）
+							jsonArray.sort((a, b) => {
+							  const dateA = new Date(a.日期);	
+							  const dateB = new Date(b.日期);
+							  return dateB - dateA; // 升序排列
+							});
                             jsonData.value = jsonArray; // 更新响应式数据
                             console.log('jsonData', jsonData.value);
                             // exportExcelJsonArray(jsonArray)
