@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-06-07 22:13:12
+ * @LastEditTime: 2025-06-07 22:23:28
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -904,15 +904,13 @@
                 }
                 function sendDiary(diary) {
                     try {
-                        fetch('http://v6864385.natappfree.cc/api/diary', {
+                        fetch('https://nine-groups-deny.loca.lt/api/diary', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify(diary)
-                        })
-                            .then(res => res.json())
-                            .then(data => {
+                        }).then(res => res.json()).then(data => {
                                 console.log('登录成功:', data);
                             })
                             .catch(err => {
