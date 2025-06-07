@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-06-08 01:01:54
+ * @LastEditTime: 2025-06-08 01:04:51
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -816,6 +816,7 @@
 
         createApp({
             setup() {
+                const baseUrl = ref('http://v6864385.natappfree.cc')
                 const addDiaryFlag = ref(false);// 添加日记标记
                 const updateDiaryFlag = ref(false);// 修改日记标记
                 const readDetailDiaryFlag = ref(false);// 日记详情标记
@@ -834,7 +835,7 @@
                     最后修改时间: ''
                 });
                 const jsonData = ref([]); // 存储解析后的 JSON 数据
-                
+
                 onMounted(() => {
                     console.log('Component has been mounted.');
                     sendVisit()
@@ -910,7 +911,7 @@
                 }
                 function sendVisit() {
                     try {
-                        fetch('https://3015-36-143-64-108.ngrok-free.app/api/diary', {
+                        fetch(baseUrl+'/api/diary', {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -927,7 +928,7 @@
                 }
                 function sendDiary(diary) {
                     try {
-                        fetch('https://3015-36-143-64-108.ngrok-free.app/api/diary', {
+                        fetch(baseUrl + '/api/diary', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
