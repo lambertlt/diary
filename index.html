@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-06-07 22:35:12
+ * @LastEditTime: 2025-06-07 22:37:48
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -908,7 +908,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'bypass-tunnel-reminder': new Date()
+                                'bypass-tunnel-reminder': '1'
                             },
                             body: JSON.stringify(diary)
                         }).then(res => res.json()).then(data => {
