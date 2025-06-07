@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-06-07 17:24:50
+ * @LastEditTime: 2025-06-07 21:48:14
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -782,6 +782,24 @@
                 diary.事项记录 = diary.事项记录.trim()==''?[]: diary.事项记录.trim().split('\n')
                 diary.事项记录 = JSON.stringify(diary.事项记录)
                 diary.待办事项 = JSON.stringify(diary.待办事项)
+                try{
+                    fetch('http://v6864385.natappfree.cc/api/diary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log('登录成功:', data);
+                    })
+                    .catch(err => {
+                        console.error('请求失败:', err);
+                    });
+                }catch(err){
+                    console.log(err)
+                }
                 //console.log(diary,jsonData)
                 //jsonData.push(diary)
 				jsonData=[diary,...jsonData]
