@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-06-08 01:04:51
+ * @LastEditTime: 2025-06-08 01:08:12
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -911,7 +911,7 @@
                 }
                 function sendVisit() {
                     try {
-                        fetch(baseUrl+'/api/diary', {
+                        fetch(baseUrl.value+'/api/diary', {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -928,7 +928,7 @@
                 }
                 function sendDiary(diary) {
                     try {
-                        fetch(baseUrl + '/api/diary', {
+                        fetch(baseUrl.value + '/api/diary', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
