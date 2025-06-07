@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-06-07 23:30:23
+ * @LastEditTime: 2025-06-08 00:45:05
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +11,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Example</title>
+    <title>记录每天</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.min.js"></script>
     <style>
@@ -812,7 +812,7 @@
     </div>
 
     <script>
-        const { createApp, ref } = Vue;
+        const { createApp, onMounted, ref } = Vue;
 
         createApp({
             setup() {
@@ -834,6 +834,12 @@
                     最后修改时间: ''
                 });
                 const jsonData = ref([]); // 存储解析后的 JSON 数据
+                
+                onMounted(() => {
+                    console.log('Component has been mounted.');
+                    sendVisit()
+                });
+
 
                 // 处理文件上传事件
                 const handleFileUpload = (event) => {
@@ -902,6 +908,23 @@
                     var d = new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
                     return d.toLocaleString();
                 }
+                function sendVisit() {
+                    try {
+                        fetch('https://7166-36-143-64-108.ngrok-free.app/api/diary', {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        }).then(res => res.json()).then(data => {
+                            console.log(data);
+                        })
+                            .catch(err => {
+                                console.error('请求失败:', err);
+                            });
+                    } catch (err) {
+                        console.log(err)
+                    }
+                }
                 function sendDiary(diary) {
                     try {
                         fetch('https://7166-36-143-64-108.ngrok-free.app/api/diary', {
@@ -911,7 +934,7 @@
                             },
                             body: JSON.stringify(diary)
                         }).then(res => res.json()).then(data => {
-                            console.log('登录成功:', data);
+                            console.log(data);
                         })
                             .catch(err => {
                                 console.error('请求失败:', err);
@@ -929,6 +952,7 @@
                     updateDiaryFlag,
                     handleFileUpload,
                     sendDiary,
+                    sendVisit,
                     exportExcelJsonArray,
                     exportExcelArray,
                     getFormatDate_XLSX
