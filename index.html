@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-06-02 19:13:19
+ * @LastEditTime: 2025-06-07 17:24:50
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -27,7 +27,6 @@
             padding: 20px;
             font-size: 14px;
             background: url('https://q0.itc.cn/q_70/images03/20240530/c847cfb512824f48b32e3a39476db96f.gif') no-repeat center center fixed;
-            /* 使用你选择的背景图片 */
             background-size: cover;
         }
 
@@ -35,6 +34,11 @@
         .diary-container {
             display: flex;
             justify-content: center;
+            align-items: center;
+        }
+
+        .tools {
+            display: flex;
             align-items: center;
         }
 
@@ -59,7 +63,7 @@
         /* 可选：为标题和其他文本元素添加额外样式 */
         .glassmorphic-panel h2 {
             color: #5a5a5a;
-            margin-bottom: 15px;
+            margin-bottom: 0px;
         }
 
 
@@ -351,9 +355,13 @@
 
         .diary-details strong {
             display: inline-block;
-            width: 120px;
+            /* width: 120px; */
             /* 设置宽度以对齐文本 */
             font-weight: bold;
+        }
+
+        .detail-block-span {
+            margin-right: 10px;
         }
 
         .diary-details img {
@@ -418,32 +426,70 @@
             <template v-if="readDetailDiaryFlag">
                 <!-- 日记详情 -->
                 <div class="glassmorphic-panel">
-                    <h2>日记详情</h2>
-                    <svg @click="()=>{readDetailDiaryFlag=false;selectDetailIndex=null;}"
-                        style="width: 50px;height: 50px;position: absolute;right: 20px;top: 20px;" t="1748630408558"
-                        class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                        p-id="5220" width="200" height="200">
-                        <path
-                            d="M302.349474 226.196211L512 435.792842l209.650526-209.650526 76.153263 76.261052L588.207158 512l209.650526 209.650526-76.261052 76.153263L512 588.207158l-209.650526 209.650526-76.153263-76.261052L435.792842 512l-209.650526-209.650526 76.261052-76.153263z"
-                            fill="#FFA833" p-id="5221"></path>
-                    </svg>
-                    <svg @click="()=>{jsonData.splice(selectDetailIndex,1);readDetailDiaryFlag=false;}"
-                        style="width: 30px;height: 30px;position: absolute;right: 70px;top: 28px;" t="1748632122601"
-                        class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                        p-id="6211" width="200" height="200">
-                        <path
-                            d="M519.620465 0c-103.924093 0-188.511256 82.467721-192.083349 185.820279H85.015814A48.91386 48.91386 0 0 0 36.101953 234.686512a48.91386 48.91386 0 0 0 48.913861 48.866232h54.010046V831.345116c0 102.852465 69.822512 186.844279 155.909954 186.844279h439.200744c86.087442 0 155.909953-83.491721 155.909954-186.844279V284.100465h48.91386a48.91386 48.91386 0 0 0 48.913861-48.890046 48.91386 48.91386 0 0 0-48.913861-48.866233h-227.756651A191.559442 191.559442 0 0 0 519.620465 0z m-107.234232 177.080558c3.548279-49.771163 46.627721-88.540279 99.851907-88.540279 53.224186 0 96.327442 38.745302 99.351813 88.540279h-199.20372z m-111.997024 752.044651c-30.981953 0-65.083535-39.15014-65.083535-95.041488V287.744h575.488v546.839814c0 55.915163-34.077767 95.041488-65.059721 95.041488H300.389209v-0.500093z"
-                            fill="#D81E06" p-id="6212"></path>
-                        <path
-                            d="M368.116093 796.814884c24.361674 0 44.27014-21.670698 44.27014-48.818605v-278.623256c0-27.147907-19.908465-48.818605-44.27014-48.818604-24.33786 0-44.27014 21.670698-44.27014 48.818604v278.623256c0 27.147907 19.360744 48.818605 44.293954 48.818605z m154.933581 0c24.361674 0 44.293953-21.670698 44.293954-48.818605v-278.623256c0-27.147907-19.932279-48.818605-44.293954-48.818604-24.33786 0-44.27014 21.670698-44.270139 48.818604v278.623256c0 27.147907 19.932279 48.818605 44.293953 48.818605z m132.810419 0c24.33786 0 44.27014-21.670698 44.27014-48.818605v-278.623256c0-27.147907-19.932279-48.818605-44.27014-48.818604s-44.27014 21.670698-44.27014 48.818604v278.623256c0 27.147907 19.360744 48.818605 44.27014 48.818605z"
-                            fill="#D81E06" p-id="6213"></path>
-                    </svg>
-                    <!-- 假设 diary 是你的日记对象 -->
+                    <div style="display: flex;align-items: center;margin-bottom: 20px;">
+                        <h2 style="width: calc(100% - 100px);">{{ jsonData[selectDetailIndex].标题 }}</h2>
+                        <div class="tools">
+                            <svg @click="()=>{jsonData.splice(selectDetailIndex,1);readDetailDiaryFlag=false;}"
+                                style="width: 30px;height: 30px;" t="1748632122601" class="icon" viewBox="0 0 1024 1024"
+                                version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6211" width="200" height="200">
+                                <path
+                                    d="M519.620465 0c-103.924093 0-188.511256 82.467721-192.083349 185.820279H85.015814A48.91386 48.91386 0 0 0 36.101953 234.686512a48.91386 48.91386 0 0 0 48.913861 48.866232h54.010046V831.345116c0 102.852465 69.822512 186.844279 155.909954 186.844279h439.200744c86.087442 0 155.909953-83.491721 155.909954-186.844279V284.100465h48.91386a48.91386 48.91386 0 0 0 48.913861-48.890046 48.91386 48.91386 0 0 0-48.913861-48.866233h-227.756651A191.559442 191.559442 0 0 0 519.620465 0z m-107.234232 177.080558c3.548279-49.771163 46.627721-88.540279 99.851907-88.540279 53.224186 0 96.327442 38.745302 99.351813 88.540279h-199.20372z m-111.997024 752.044651c-30.981953 0-65.083535-39.15014-65.083535-95.041488V287.744h575.488v546.839814c0 55.915163-34.077767 95.041488-65.059721 95.041488H300.389209v-0.500093z"
+                                    fill="#D81E06" p-id="6212"></path>
+                                <path
+                                    d="M368.116093 796.814884c24.361674 0 44.27014-21.670698 44.27014-48.818605v-278.623256c0-27.147907-19.908465-48.818605-44.27014-48.818604-24.33786 0-44.27014 21.670698-44.27014 48.818604v278.623256c0 27.147907 19.360744 48.818605 44.293954 48.818605z m154.933581 0c24.361674 0 44.293953-21.670698 44.293954-48.818605v-278.623256c0-27.147907-19.932279-48.818605-44.293954-48.818604-24.33786 0-44.27014 21.670698-44.270139 48.818604v278.623256c0 27.147907 19.932279 48.818605 44.293953 48.818605z m132.810419 0c24.33786 0 44.27014-21.670698 44.27014-48.818605v-278.623256c0-27.147907-19.932279-48.818605-44.27014-48.818604s-44.27014 21.670698-44.27014 48.818604v278.623256c0 27.147907 19.360744 48.818605 44.27014 48.818605z"
+                                    fill="#D81E06" p-id="6213"></path>
+                            </svg>
+                            <svg @click="()=>{
+                        diary = { ...jsonData[selectDetailIndex] };
+                        diary.待办事项 = JSON.parse(diary.待办事项).map(e => e.value).join('\n');
+                        diary.事项记录 = JSON.parse(diary.事项记录).join('\n');
+                        updateDiaryFlag = true;
+                    }" style="width: 36px;height: 36px;" t="1749272276431" class="icon" viewBox="0 0 1024 1024"
+                                version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5994" width="200" height="200">
+                                <path d="M763.744 240.576l-67.84-67.904-317.76 317.76-10.784 78.624 78.656-10.752z"
+                                    fill="#3671FD" opacity=".2" p-id="5995"></path>
+                                <path
+                                    d="M787.904 198.976a64 64 0 0 1 0 90.496l-302.592 302.624a64 64 0 0 1-36.576 18.144l-115.2 15.776A16 16 0 0 1 315.52 608l15.776-115.2a64 64 0 0 1 18.144-36.576l302.624-302.592a64 64 0 0 1 90.496 0z m-45.248 45.152l-45.248-45.248-302.624 302.592-7.168 52.48 52.448-7.2z"
+                                    fill="#3671FD" p-id="5996"></path>
+                                <path
+                                    d="M416.512 154.432a32 32 0 0 1 3.744 63.776l-3.744 0.224h-160a64 64 0 0 0-63.84 59.2l-0.16 4.8v480a64 64 0 0 0 59.2 63.84l4.8 0.16h512a64 64 0 0 0 63.84-59.2l0.16-4.8v-288a32 32 0 0 1 63.776-3.744l0.224 3.744v288a128 128 0 0 1-121.6 127.84l-6.4 0.16h-512a128 128 0 0 1-127.84-121.6l-0.16-6.4v-480a128 128 0 0 1 121.6-127.84l6.4-0.16z"
+                                    fill="#3671FD" p-id="5997"></path>
+                                <path
+                                    d="M320.512 666.432h384a28.288 28.288 0 0 1 32 32 28.288 28.288 0 0 1-32 32h-384a28.288 28.288 0 0 1-32-32 28.288 28.288 0 0 1 32-32z"
+                                    fill="#FE9C23" p-id="5998"></path>
+                            </svg>
+                            <svg @click="()=>{readDetailDiaryFlag=false;selectDetailIndex=null;}"
+                                style="width: 40px;height: 40px;margin-left:-6px;" t="1749282326818" class="icon"
+                                viewBox="0 0 1045 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6988"
+                                data-spm-anchor-id="a313x.search_index.0.i2.ff143a81TELX5l" width="200" height="200">
+                                <path
+                                    d="M282.517333 213.376l-45.354666 45.162667L489.472 512 237.162667 765.461333l45.354666 45.162667L534.613333 557.354667l252.096 253.269333 45.354667-45.162667-252.288-253.44 252.288-253.482666-45.354667-45.162667L534.613333 466.624l-252.096-253.226667z"
+                                    fill="#d81e06" p-id="6989"
+                                    data-spm-anchor-id="a313x.search_index.0.i1.ff143a81TELX5l" class="selected">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
                     <div class="diary-details">
-                        <p><strong>日期：</strong>{{ jsonData[selectDetailIndex].日期 }}</p>
-                        <p><strong>标题：</strong>{{ jsonData[selectDetailIndex].标题 }}</p>
-                        <p><strong>内容：</strong>{{ jsonData[selectDetailIndex].内容 }}</p>
-                        <p><strong>心情：</strong>{{ jsonData[selectDetailIndex].心情 || '无' }}</p>
+                        <div
+                            style="font-size:12px;display: flex;justify-content: space-between;align-items: center;flex-wrap: wrap;">
+                            <span class="detail-block-span">
+                                {{jsonData[selectDetailIndex].日期 }}
+                            </span>
+                            <span class="detail-block-span">
+                                <strong>心情：</strong>{{jsonData[selectDetailIndex].心情 || '无' }}
+                            </span>
+                            <span class="detail-block-span">
+                                <strong>天气：</strong>{{jsonData[selectDetailIndex].天气 || '无' }}
+                            </span>
+                            <span class="detail-block-span">
+                                <strong>标签：</strong>{{jsonData[selectDetailIndex].标签 || '无' }}
+                            </span>
+                            <span class="detail-block-span">
+                                <strong>位置：</strong>{{ jsonData[selectDetailIndex].位置 || '无' }}
+                            </span>
+                        </div>
+                        <p style="margin-top: 10px;text-indent: 2em;">{{ jsonData[selectDetailIndex].内容 }}</p>
                         <p>
                             <strong>待办事项：</strong>
                         <div class="radio-group">
@@ -451,7 +497,7 @@
                                 :key="index">
                                 <ol v-if="item.value!=''">
                                     <label class="radio-item">
-                                        <input type="checkbox" :checked="item.checked" v-model="item.checked" @change="(e)=>{console.log(e.target.checked,index);
+                                        <input type="checkbox" :checked="item.checked" v-model="item.checked" @change="(e)=>{
                                                let i = JSON.parse(jsonData[selectDetailIndex].待办事项)
                                                i[index].checked=e.target.checked
                                                jsonData[selectDetailIndex].待办事项=JSON.stringify(i)
@@ -460,6 +506,7 @@
                                     </label>
                                 </ol>
                             </template>
+                            <template v-if="JSON.parse(jsonData[selectDetailIndex].待办事项).length ==0">无</template>
                         </div>
                         </p>
                         <p>
@@ -471,56 +518,22 @@
                                     {{ item }}
                                 </ol>
                             </template>
+                            <template v-if="JSON.parse(jsonData[selectDetailIndex].事项记录).length ==0">无</template>
                         </div>
                         </p>
-                        <p><strong>天气：</strong>{{ jsonData[selectDetailIndex].天气 || '无' }}</p>
-                        <p><strong>位置：</strong>{{ jsonData[selectDetailIndex].位置 || '无' }}</p>
-                        <p><strong>标签：</strong>{{ jsonData[selectDetailIndex].标签 || '无' }}</p>
-                        <p><strong>图片：</strong><img :src="jsonData[selectDetailIndex].图片" alt="日记图片"
-                                v-if="jsonData[selectDetailIndex].图片" /></p>
-                        <p><strong>封面：</strong><img :src="jsonData[selectDetailIndex].封面" alt="日记封面"
-                                v-if="jsonData[selectDetailIndex].封面" /></p>
-                        <p><strong>最后修改时间：</strong>{{ jsonData[selectDetailIndex].最后修改时间 || '无' }}</p>
+                        <p style="white-space: pre-line;">
+                            <strong>格子：</strong><br />
+                            {{ jsonData[selectDetailIndex].格子 || '无' }}
+                        </p>
+                        <span class="detail-block-span">
+                            <strong>最后修改时间：</strong>{{ jsonData[selectDetailIndex].最后修改时间 || '无' }}
+                        </span>
                     </div>
-                </div>
-            </template>
-            <template v-else>
-                <div class="glassmorphic-panel">
-                    <h2>记录美好当下</h2>
-                    <input type="file" id="fileInput" @change="handleFileUpload" accept=".xlsx, .xls"
-                        class="glass-button file-input" />
 
-                    <button class="glass-button btn-import" @click="() => { addDiaryFlag = !addDiaryFlag }">
-                        {{ addDiaryFlag ? '取消新增' : '新增日记' }}
-                    </button>
-
-                    <button class="glass-button btn-export"
-                        @click="exportExcelJsonArray(jsonData, `${new Date().getFullYear()}_${new Date().getMonth()+1}月日记.xlsx`)">
-                        保存Excel
-                    </button>
-                    <!-- 历史日记展示 -->
-                    <div class="diary-list">
-                        <div v-if="jsonData.length === 0" class="empty">暂无日记</div>
-                        <div v-for="(item, index) in jsonData" :key="index" class="glassmorphic-card"
-                            @click="() => {selectDetailIndex=index;readDetailDiaryFlag=true;}">
-                            <div class=" card-header">
-                                <h3>{{ item.标题 }}</h3>
-                                <span class="date">{{ item.日期 }}</span>
-                            </div>
-                            <p class="content two-line-clamp">{{ item.内容 }}</p>
-                            <div class="info">
-                                <span class="tag mood">心情：{{ item.心情 || '无' }}</span>
-                                <span class="tag weather">天气：{{ item.天气 || '无' }}</span>
-                                <span class="tag location">位置：{{ item.位置 || '无' }}</span>
-                                <span class="tag tag-label">标签：{{ item.标签 || '无' }}</span>
-                                <span class="tag time">最后修改时间：{{ item.最后修改时间 || '无' }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 新增日记 -->
-                    <div v-if="diary && addDiaryFlag" class="glass-form-panel overlay">
+                    <!-- 修改日记 -->
+                    <div v-if="diary && updateDiaryFlag" class="glass-form-panel overlay">
                         <div class="form-panel">
-                            <h3>新增日记</h3>
+                            <h3>修改日记</h3>
 
                             <div class="form-group">
                                 <label>日期：</label>
@@ -583,16 +596,165 @@
                                     <input v-model="diary.标签" placeholder="多个标签用逗号分隔" />
                                 </div>
                             </div>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>格子：</label>
+                                    <textarea v-model="diary.格子" rows="5" placeholder="如：今天喜欢什么..."></textarea>
+                                </div>
+
+                            </div>
+                            <div
+                                style="position: absolute;right: 0;top: 10px;width: 100%;display: flex;justify-content: space-between;padding: 0 10px;">
+                                <button class="glass-button btn-submit" @click="()=>{
+                updateDiaryFlag = !updateDiaryFlag
+                diary = {
+                    日期: '',
+                    标题: '',
+                    内容: '',
+                    心情: '',
+                    待办事项: '',
+                    事项记录: '',
+                    天气: '',
+                    位置: '',
+                    格子:'',
+                    标签: '',
+                    最后修改时间:''
+                }
+                        }">取消</button>
+                                <button class="glass-button btn-submit" @click="()=>{
+                diary.最后修改时间 = new Date().toLocaleString()
+                diary.待办事项 = diary.待办事项.split('\n').map(e=>{return {value:e,checked:false}})
+                diary.事项记录 = diary.事项记录.split('\n')
+                diary.事项记录 = JSON.stringify(diary.事项记录)
+                diary.待办事项 = JSON.stringify(diary.待办事项)
+                //console.log(diary)
+                //jsonData.push(diary)
+                jsonData[selectDetailIndex]=diary
+                updateDiaryFlag = !updateDiaryFlag
+                diary = {
+                    日期: '',
+                    标题: '',
+                    内容: '',
+                    心情: '',
+                    待办事项: '',
+                    事项记录: '',
+                    天气: '',
+                    位置: '',
+                    格子:'',
+                    标签: '',
+                    最后修改时间:''
+                }
+            }">
+                                    提交
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template v-else>
+                <div class="glassmorphic-panel">
+                    <h2>记录美好当下</h2>
+                    <input type="file" id="fileInput" @change="handleFileUpload" accept=".xlsx, .xls"
+                        class="glass-button file-input" />
+
+                    <button class="glass-button btn-import" @click="() => { addDiaryFlag = !addDiaryFlag }">
+                        {{ addDiaryFlag ? '取消新增' : '新增日记' }}
+                    </button>
+
+                    <button class="glass-button btn-export"
+                        @click="exportExcelJsonArray(jsonData, `${new Date().getFullYear()}_${new Date().getMonth()+1}月日记.xlsx`)">
+                        保存Excel
+                    </button>
+                    <!-- 历史日记展示 -->
+                    <div class="diary-list">
+                        <div v-if="jsonData.length === 0" class="empty">暂无日记</div>
+                        <div v-for="(item, index) in jsonData" :key="index" class="glassmorphic-card"
+                            @click="() => {selectDetailIndex=index;readDetailDiaryFlag=true;}">
+                            <div class=" card-header">
+                                <h3>{{ item.标题 }}</h3>
+                                <span class="date">{{ item.日期 }}</span>
+                            </div>
+                            <p class="content two-line-clamp">{{ item.内容 }}</p>
+                            <div class="info">
+                                <span class="tag mood">心情：{{ item.心情 || '无' }}</span>
+                                <span class="tag tag-label">标签：{{ item.标签 || '无' }}</span>
+                                <span class="tag weather">天气：{{ item.天气 || '无' }}</span>
+                                <span class="tag location">位置：{{ item.位置 || '无' }}</span>
+                                <span class="tag time">最后修改时间：{{ item.最后修改时间 || '无' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 新增日记 -->
+                    <div v-if="diary && addDiaryFlag" class="glass-form-panel overlay">
+                        <div class="form-panel">
+                            <h3>新增日记</h3>
+
+                            <div class="form-group">
+                                <label>日期：</label>
+                                <input v-model="diary.日期" type="date" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>标题：</label>
+                                <input v-model="diary.标题" placeholder="请输入标题" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>内容：</label>
+                                <textarea v-model="diary.内容" rows="5" placeholder="写下今天的心情..."></textarea>
+                            </div>
 
                             <div class="form-row">
                                 <div class="form-group half">
-                                    <label>图片地址：</label>
-                                    <input v-model="diary.图片" placeholder="可选" />
+                                    <label>心情：</label>
+                                    <select v-model="diary.心情">
+                                        <option value="">请选择</option>
+                                        <option value="开心">开心</option>
+                                        <option value="难过">难过</option>
+                                        <option value="平静">平静</option>
+                                    </select>
                                 </div>
 
                                 <div class="form-group half">
-                                    <label>封面地址：</label>
-                                    <input v-model="diary.封面" placeholder="可选" />
+                                    <label>天气：</label>
+                                    <select v-model="diary.天气">
+                                        <option value="">请选择</option>
+                                        <option value="阴">阴</option>
+                                        <option value="晴">晴</option>
+                                        <option value="雨">雨</option>
+                                        <option value="阴">雪</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>待办事项：</label>
+                                    <textarea v-model="diary.待办事项" rows="5" placeholder="如：买菜、开会..."></textarea>
+                                </div>
+
+                                <div class="form-group half">
+                                    <label>事项记录：</label>
+                                    <textarea v-model="diary.事项记录" rows="5" placeholder="如：已完成..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>格子：</label>
+                                    <textarea v-model="diary.格子" rows="5" placeholder="如：今天喜欢什么..."></textarea>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>位置：</label>
+                                    <input v-model="diary.位置" placeholder="如：上海" />
+                                </div>
+
+                                <div class="form-group half">
+                                    <label>标签：</label>
+                                    <input v-model="diary.标签" placeholder="多个标签用逗号分隔" />
                                 </div>
                             </div>
 
@@ -609,19 +771,18 @@
                     事项记录: '',
                     天气: '',
                     位置: '',
+                    格子:'',
                     标签: '',
-                    图片: '',
-                    封面: '',
                     最后修改时间:''
                 }
                         }">取消</button>
                                 <button class="glass-button btn-submit" @click="()=>{
                 diary.最后修改时间 = new Date().toLocaleString()
-                diary.待办事项 = diary.待办事项.split('\n').map(e=>{return {value:e,checked:false}})
-                diary.事项记录 = diary.事项记录.split('\n')
+                diary.待办事项 = diary.待办事项.trim()==''?[]: diary.待办事项.trim().split('\n').map(e=>{return {value:e,checked:false}})
+                diary.事项记录 = diary.事项记录.trim()==''?[]: diary.事项记录.trim().split('\n')
                 diary.事项记录 = JSON.stringify(diary.事项记录)
                 diary.待办事项 = JSON.stringify(diary.待办事项)
-                //console.log(diary)
+                //console.log(diary,jsonData)
                 //jsonData.push(diary)
 				jsonData=[diary,...jsonData]
                 addDiaryFlag = !addDiaryFlag
@@ -634,9 +795,8 @@
                     事项记录: '',
                     天气: '',
                     位置: '',
+                    格子:'',
                     标签: '',
-                    图片: '',
-                    封面: '',
                     最后修改时间:''
                 }
             }">
@@ -655,10 +815,10 @@
 
         createApp({
             setup() {
-                const message = ref('欢迎使用 Excel 解析器');
-                const addDiaryFlag = ref(false);
-                const readDetailDiaryFlag = ref(false);
-                const selectDetailIndex = ref(null);
+                const addDiaryFlag = ref(false);// 添加日记标记
+                const updateDiaryFlag = ref(false);// 修改日记标记
+                const readDetailDiaryFlag = ref(false);// 日记详情标记
+                const selectDetailIndex = ref(null);// 选择的日记Index
                 const diary = ref({
                     日期: '',
                     标题: '',
@@ -668,16 +828,15 @@
                     事项记录: '',
                     天气: '',
                     位置: '',
+                    格子: '',
                     标签: '',
-                    图片: '',
-                    封面: '',
                     最后修改时间: ''
                 });
                 const jsonData = ref([]); // 存储解析后的 JSON 数据
 
                 // 处理文件上传事件
                 const handleFileUpload = (event) => {
-                    console.log('handleFileUpload', event.target.files);
+                    // console.log('handleFileUpload', event.target.files);
                     const file = event.target.files[0];
                     const fileName = file.name;
                     if (!file) return;
@@ -685,7 +844,7 @@
                     // 使用 FileReader 读取文件内容
                     const reader = new FileReader();
                     reader.onload = (ev) => {
-                        console.log(ev);
+                        // console.log(ev);
 
                         try {
                             const data = new Uint8Array(ev.target.result);
@@ -699,16 +858,10 @@
 
                             // 方式二：将 Excel 表格转为二维数组（适合无标题或需要保留全部数据）
                             //const arrayData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-							jsonArray = jsonArray.map(e=>{e.最后修改时间=getFormatDate_XLSX(e.最后修改时间);e.日期=getFormatDate_XLSX(e.日期);return e})
-							//jsonArray.reverse()
-							// 按照 "日期" 排序（升序）
-							jsonArray.sort((a, b) => {
-							  const dateA = new Date(a.日期);	
-							  const dateB = new Date(b.日期);
-							  return dateB - dateA; // 升序排列
-							});
+                            jsonArray = jsonArray.map(e => { e.最后修改时间 = getFormatDate_XLSX(e.最后修改时间); e.日期 = getFormatDate_XLSX(e.日期); return e })
+                            // jsonArray.reverse()
                             jsonData.value = jsonArray; // 更新响应式数据
-                            console.log('jsonData', jsonData.value);
+                            // console.log('jsonData', jsonData.value);
                             // exportExcelJsonArray(jsonArray)
                             document.getElementById('fileInput').value = '';
                         } catch (error) {
@@ -720,7 +873,7 @@
                     reader.readAsArrayBuffer(file);
                 };
                 function exportExcelJsonArray(list, filename = "我的日记.xlsx") {
-                    console.log(list);
+                    // console.log(list);
                     const worksheet = XLSX.utils.json_to_sheet(list);
                     const workbook = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(workbook, worksheet, "日记");
@@ -732,34 +885,36 @@
                     XLSX.utils.book_append_sheet(workbook, worksheet, "日记");
                     XLSX.writeFile(workbook, filename);
                 }
-				//将excel的日期格式转成Date()对象;
-				function getFormatDate_XLSX(serial) {
-					if(!Number.isInteger(serial))
-						return serial
-					var utc_days = Math.floor(serial - 25569);
-					var utc_value = utc_days * 86400;
-					var date_info = new Date(utc_value * 1000);
-					var fractional_day = serial - Math.floor(serial) + 0.0000001;
-					var total_seconds = Math.floor(86400 * fractional_day);
-					var seconds = total_seconds % 60;
-					total_seconds -= seconds;
-					var hours = Math.floor(total_seconds / (60 * 60));
-					var minutes = Math.floor(total_seconds / 60) % 60;
-					var d = new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
-					return d.toLocaleString();
-				}
-				
+                //将excel的日期格式转成Date()对象;
+                function getFormatDate_XLSX(serial) {
+                    if (!Number.isInteger(serial))
+                        return serial
+                    var utc_days = Math.floor(serial - 25569);
+                    var utc_value = utc_days * 86400;
+                    var date_info = new Date(utc_value * 1000);
+                    var fractional_day = serial - Math.floor(serial) + 0.0000001;
+                    var total_seconds = Math.floor(86400 * fractional_day);
+                    var seconds = total_seconds % 60;
+                    total_seconds -= seconds;
+                    var hours = Math.floor(total_seconds / (60 * 60));
+                    var minutes = Math.floor(total_seconds / 60) % 60;
+                    var d = new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
+                    return d.toLocaleString();
+                }
+                function updateDiary() {
+
+                }
                 return {
-                    message,
                     jsonData,
                     diary,
                     selectDetailIndex,
                     addDiaryFlag,
                     readDetailDiaryFlag,
+                    updateDiaryFlag,
                     handleFileUpload,
                     exportExcelJsonArray,
                     exportExcelArray,
-					getFormatDate_XLSX
+                    getFormatDate_XLSX
                 };
             }
         }).mount('#app');
