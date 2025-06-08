@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-05-30 22:00:16
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-06-08 01:18:05
+ * @LastEditTime: 2025-06-08 12:39:04
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -915,6 +915,7 @@
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'ngrok-skip-browser-warning': 'any-value'
                             },
                         }).then(res => res.json()).then(data => {
                             console.log(data);
