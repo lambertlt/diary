@@ -1,0 +1,215 @@
+<!--
+ * @Version: 1.0
+ * @Autor: 兰田 Lambert_work@163.com
+ * @Date: 2025-07-21 01:31:45
+ * @LastEditors: lambertlt lambert_Y_Y@163.com
+ * @LastEditTime: 2025-07-21 04:01:00
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导出Excel示例</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- 引入 xlsx 库 -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body{
+            font-size: 14px;
+        }
+        input{
+            min-width: 400px;
+            padding: 5px 10px;
+        }
+        .group-input{
+            display: flex;
+            margin: 10px 0;
+        }
+        label{
+            width: 200px;
+        }
+        button{
+            padding: 5px 10px;
+            margin-right: 10px ;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div class="group-input">
+            <label>起始值:</label>
+            <input type="number" v-model.number="start">
+        </div>
+        <div class="group-input">
+            <label>结束值:</label>
+            <input type="number" v-model.number="end">
+        </div>
+        <div class="group-input">
+            <label>最大组数:</label>
+            <input type="number" v-model.number="max">
+        </div>
+        <div class="group-input">
+            <label>抽取模板值（逗号分隔）:</label>
+            <input type="text" v-model.lazy="templateInput">
+        </div>
+        <div class="group-input">
+            <label>excel几行一列:</label>
+            <input type="number" v-model.number="chunkSize">
+        </div>
+        <button @click="generateData">生成</button>
+        <button @click="exportToExcel">导出 Excel</button>
+
+        <!-- 预览 result.value -->
+        <div v-if="result.length>0">
+            <h3>生成的结果预览：</h3>
+            <table border="1" cellpadding="5" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>区间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in result" :key="index">
+                        <td>{{ index + 1 }}</td>
+                        <td>{{ item }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, onMounted, ref, watch } = Vue;
+
+        createApp({
+            setup() {
+                const message = ref('Hello vue!')
+                const arr = ref([])
+                const start = ref(1)
+                const end = ref(2000)
+                const template = ref([5, 5, 5, 5, 10, 10, 15, 20, 20, 20, 25, 30])
+                const templateInput = ref(template.value.join(','))
+                const result = ref([])
+                const max = ref(200)
+                const chunkSize = ref(20)
+
+                function getRandomElement(arr) {
+                    return arr[Math.floor(Math.random() * arr.length)];
+                }
+
+                function exportToExcel() {
+                    let chunkSize = chunkSize.value; // 每列最多20行
+                    const columns = Math.ceil(result.value.length / chunkSize);
+                    const sheetData = [];
+
+                    // 添加表头
+                    const headerRow = [];
+                    for (let i = 0; i < columns; i++) {
+                        headerRow.push('序号', '作业人');
+                    }
+                    sheetData.push(headerRow);
+
+                    // 构建二维数组，每列放20个数据
+                    for (let row = 0; row < chunkSize; row++) {
+                        const rowData = [];
+                        for (let col = 0; col < columns; col++) {
+                            const index = col * chunkSize + row;
+                            rowData.push(index < result.value.length ? result.value[index] : '');
+                            rowData.push('')
+                        }
+                        sheetData.push(rowData);
+                    }
+
+                    /* 将数据转换为 worksheet */
+                    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "分组数据");
+
+                    /* 生成 Excel 文件并触发下载 */
+                    XLSX.writeFile(wb, "result_20行一列.xlsx");
+                }
+
+                function generateData() {
+                    for (let i = start.value; i <= end.value; i++) {
+                        arr.value.push(i);
+                    }
+
+                    while (1) {
+                        while (arr.value.length > 0) {
+                            let num = getRandomElement(template.value);
+                            let s = arr.value[0];
+                            let e;
+                            if (num > arr.value.length) {
+                                e = arr.value[arr.value.length - 1];
+                            } else {
+                                e = arr.value[num - 1];
+                            }
+                            result.value.push(`${s} - ${e}`);
+                            arr.value.splice(0, num);
+                        }
+                        if (result.value.length < max.value) {
+                            break;
+                        } else {
+                            result.value = [];
+                            arr.value = [];
+                            for (let i = start.value; i <= end.value; i++) {
+                                arr.value.push(i);
+                            }
+                        }
+                    }
+                    alert("恭喜你，生成成功！可以点击导出Excel了")
+                    console.log(result.value);
+                }
+
+                onMounted(() => {
+                    console.log('Component has been mounted.');
+
+                });
+
+                watch(templateInput, (newVal) => {
+                    template.value = newVal.split(',').map(Number).filter(n => !isNaN(n));
+                });
+
+                return {
+                    message,
+                    start,
+                    end,
+                    templateInput,
+                    max,
+                    chunkSize,
+                    result,
+                    exportToExcel,
+                    generateData
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+
+</html>
