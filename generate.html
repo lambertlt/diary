@@ -3,7 +3,7 @@
  * @Autor: 兰田 Lambert_work@163.com
  * @Date: 2025-07-21 01:31:45
  * @LastEditors: lambertlt lambert_Y_Y@163.com
- * @LastEditTime: 2025-07-21 04:09:46
+ * @LastEditTime: 2025-07-21 04:16:36
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -124,8 +124,8 @@
                 }
 
                 function exportToExcel() {
-                    let chunkSize = chunkSize.value; // 每列最多20行
-                    const columns = Math.ceil(result.value.length / chunkSize);
+                    let chunkSize1 = chunkSize.value; // 每列最多20行
+                    const columns = Math.ceil(result.value.length / chunkSize1);
                     const sheetData = [];
 
                     // 添加表头
@@ -136,10 +136,10 @@
                     sheetData.push(headerRow);
 
                     // 构建二维数组，每列放20个数据
-                    for (let row = 0; row < chunkSize; row++) {
+                    for (let row = 0; row < chunkSize1; row++) {
                         const rowData = [];
                         for (let col = 0; col < columns; col++) {
-                            const index = col * chunkSize + row;
+                            const index = col * chunkSize1 + row;
                             rowData.push(index < result.value.length ? result.value[index] : '');
                             rowData.push('')
                         }
