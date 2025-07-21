@@ -152,7 +152,7 @@
                     XLSX.utils.book_append_sheet(wb, ws, "分组数据");
 
                     /* 生成 Excel 文件并触发下载 */
-                    XLSX.writeFile(wb, "result_20行一列.xlsx");
+                    XLSX.writeFile(wb, `${new Date().toLocaleDateString().replaceAll("/","-")}号任务分发表.xlsx`);
                 }
 
                 function generateData() {
