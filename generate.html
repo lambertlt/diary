@@ -161,23 +161,32 @@
                     }
 
                     while (1) {
+						let startFlag = true
                         while (arr.value.length > 0) {
                             let num = getRandomElement(template.value);
                             let s = arr.value[0];
                             let e;
-                            if (num > arr.value.length) {
+							
+							if(startFlag){
+                                if(start.value!=1){
+									e = num;
+									num = num - start.value + 1 // 对齐开始序号
+								}
+                            }else if (num > arr.value.length) {
                                 e = arr.value[arr.value.length - 1];
                             } else {
                                 e = arr.value[num - 1];
                             }
                             result.value.push(`${s} - ${e}`);
                             arr.value.splice(0, num);
+							startFlag = false
                         }
                         if (result.value.length < max.value) {
                             break;
                         } else {
                             result.value = [];
                             arr.value = [];
+							startFlag = true
                             for (let i = start.value; i <= end.value; i++) {
                                 arr.value.push(i);
                             }
