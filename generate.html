@@ -168,10 +168,12 @@
                             let e;
 							
 							if(startFlag){
-                                if(start.value!=1){
-									e = num;
-									num = num - start.value + 1 // 对齐开始序号
+								if(start.value>9&&start.value%10%6!=0){
+									num = num - start.value%10%5 + 1 // 对齐开始序号
+								}else if(start.value<10){
+									num = num - start.value%5 + 1
 								}
+								e = arr.value[num - 1];
                             }else if (num > arr.value.length) {
                                 e = arr.value[arr.value.length - 1];
                             } else {
