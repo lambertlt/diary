@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📸 高清版 - 气泡图 + 拼接图 双复制</title>
+  <title>📸 高清版 + 点击放大预览</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -46,7 +46,7 @@
 
     .meta-info strong {
       display: inline-block;
-      width: 140px;
+      width: 100px;
       color: #1a73e8;
     }
 
@@ -71,6 +71,7 @@
       border-radius: 4px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
       object-fit: contain;
+      cursor: pointer;
     }
 
     .row-canvas {
@@ -79,6 +80,7 @@
       display: block;
       margin: 8px 0;
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
     }
 
     .copy-btn {
@@ -105,16 +107,68 @@
     .success {
       color: #388e3c;
     }
+
+    /* 模态框样式 */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal-content {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      font-size: 28px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      opacity: 0.8;
+    }
+
+    .modal-close:hover {
+      opacity: 1;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   </style>
 </head>
 <body>
 
-  <h2>📸 高清版 - 气泡图 + 拼接图 双复制（画质优化）</h2>
-  <p class="info">支持高清渲染，保持原始画质</p>
+  <h2>📸 高清版 + 点击放大预览 + 双复制</h2>
+  <p class="info">支持高清渲染、一键复制、点击图片查看原图</p>
 
   <input type="file" id="fileInput" accept=".xlsx, .xls" />
   <div id="results"></div>
 
+  <!-- 依赖库 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <script>
@@ -122,6 +176,34 @@
     const resultsDiv = document.getElementById('results');
 
     fileInput.addEventListener('change', handleFile);
+
+    // 创建模态框（用于放大预览）
+    function createModal(imgSrc) {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+
+      const img = document.createElement('img');
+      img.src = imgSrc;
+      img.className = 'modal-content';
+      img.alt = '原图预览';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'modal-close';
+      closeBtn.innerHTML = '×';
+      closeBtn.onclick = () => document.body.removeChild(modal);
+
+      modal.appendChild(img);
+      modal.appendChild(closeBtn);
+
+      // 点击背景关闭
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          document.body.removeChild(modal);
+        }
+      };
+
+      return modal;
+    }
 
     async function handleFile(e) {
       const file = e.target.files[0];
@@ -190,14 +272,14 @@
           metaDiv.innerHTML = metaHTML;
           rowDiv.appendChild(metaDiv);
 
-          // === 气泡图（高清）===
+          // === 气泡图（支持点击放大）===
           if (hasBubble) {
             const bubbleSection = document.createElement('div');
             bubbleSection.className = 'image-section';
 
             const title = document.createElement('div');
             title.className = 'section-title';
-            title.textContent = '气泡图（高清）';
+            title.textContent = '气泡图（点击放大）';
             bubbleSection.appendChild(title);
 
             const img = document.createElement('img');
@@ -213,11 +295,15 @@
             btn.className = 'copy-btn';
             btn.textContent = '📋 复制原图';
 
+            // 🔥 点击图片放大
+            img.onclick = () => document.body.appendChild(createModal(bubbleUrl));
+
             bubbleSection.appendChild(img);
             bubbleSection.appendChild(btn);
             bubbleSection.appendChild(status);
             rowDiv.appendChild(bubbleSection);
 
+            // 🔥 复制原图（高清）
             btn.addEventListener('click', async () => {
               if (!navigator.clipboard?.write) {
                 status.textContent = '❌ 不支持';
@@ -225,12 +311,11 @@
               }
 
               try {
-                // 🔥 关键：使用原始分辨率转 PNG
                 const blob = await urlToHighQualityPng(bubbleUrl);
                 await navigator.clipboard.write([
                   new ClipboardItem({ 'image/png': blob })
                 ]);
-                status.textContent = '✅ 已复制原图！';
+                status.textContent = '✅ 已复制！';
                 status.className = 'status success';
                 setTimeout(() => {
                   status.textContent = '';
@@ -243,19 +328,19 @@
             });
           }
 
-          // === 拼接图（高清）===
+          // === 拼接图（支持点击放大）===
           if (urls.length > 0) {
             const images = await loadImages(urls);
             if (images.length > 0) {
-              // 🔥 提高目标高度 → 更清晰
               const pngBlob = await combineImagesHighRes(images, 5, 300); // 300px 高度
+              const imageUrl = URL.createObjectURL(pngBlob); // 用于预览
 
               const concatSection = document.createElement('div');
               concatSection.className = 'image-section';
 
               const title = document.createElement('div');
               title.className = 'section-title';
-              title.textContent = '拼接图（高清）';
+              title.textContent = '拼接图（点击放大）';
               concatSection.appendChild(title);
 
               const canvas = document.createElement('canvas');
@@ -268,6 +353,7 @@
               btn.className = 'copy-btn';
               btn.textContent = '📋 复制高清拼接图';
 
+              // 渲染到 canvas
               const bitmap = await createImageBitmap(pngBlob);
               canvas.width = bitmap.width;
               canvas.height = bitmap.height;
@@ -275,11 +361,15 @@
               ctx.drawImage(bitmap, 0, 0);
               bitmap.close();
 
+              // 🔥 点击拼接图放大
+              canvas.onclick = () => document.body.appendChild(createModal(imageUrl));
+
               concatSection.appendChild(canvas);
               concatSection.appendChild(btn);
               concatSection.appendChild(status);
               rowDiv.appendChild(concatSection);
 
+              // 🔥 复制拼接图
               btn.addEventListener('click', async () => {
                 if (!navigator.clipboard?.write) {
                   status.textContent = '❌ 不支持';
@@ -317,7 +407,7 @@
       }
     }
 
-    // 加载图片（保持原始像素）
+    // 加载图片
     function loadImages(urls) {
       const promises = urls.map(url => {
         return new Promise(resolve => {
@@ -331,7 +421,7 @@
       return Promise.all(promises).then(list => list.filter(i => i));
     }
 
-    // 🔥 高清转换：保持原始分辨率
+    // 转为高清 PNG（原图分辨率）
     async function urlToHighQualityPng(url) {
       const img = await new Promise((resolve, reject) => {
         const i = new Image();
@@ -343,11 +433,11 @@
 
       const canvas = new OffscreenCanvas(img.width, img.height);
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0); // 原尺寸绘制
+      ctx.drawImage(img, 0, 0);
       return await canvas.convertToBlob({ type: 'image/png' });
     }
 
-    // 🔥 高清拼接：支持自定义高度（默认 300px）
+    // 高清拼接（可调高度）
     async function combineImagesHighRes(images, gap = 5, targetHeight = 300) {
       const imgData = images.map(img => {
         const ratio = targetHeight / img.height;
@@ -359,7 +449,6 @@
       });
 
       const totalWidth = imgData.reduce((w, item) => w + item.width, 0) + gap * (imgData.length - 1);
-
       const offCanvas = new OffscreenCanvas(totalWidth, targetHeight);
       const ctx = offCanvas.getContext('2d');
       ctx.fillStyle = '#fff';
