@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📸 高清版 - 气泡图 + 拼接图 双复制</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+      color: #333;
+    }
+    h2 {
+      color: #2c3e50;
+    }
+    .info {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    #fileInput {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .result-row {
+      margin: 25px 0;
+      padding: 18px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .meta-info {
+      margin-bottom: 15px;
+      padding: 12px;
+      background: #f1f5f9;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .meta-info strong {
+      display: inline-block;
+      width: 140px;
+      color: #1a73e8;
+    }
+
+    .image-section {
+      margin: 15px 0;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border: 1px dashed #ccc;
+    }
+
+    .section-title {
+      font-weight: bold;
+      color: #333;
+      margin: 0 0 8px 0;
+      font-size: 15px;
+    }
+
+    .thumb-img {
+      max-height: 120px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      object-fit: contain;
+    }
+
+    .row-canvas {
+      max-width: 100%;
+      border: 1px solid #ddd;
+      display: block;
+      margin: 8px 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .copy-btn {
+      padding: 6px 12px;
+      font-size: 13px;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    .copy-btn:hover {
+      background: #0d62c9;
+    }
+
+    .status {
+      display: inline-block;
+      color: #d32f2f;
+      font-size: 13px;
+      margin-left: 10px;
+      min-height: 18px;
+    }
+    .success {
+      color: #388e3c;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📸 高清版 - 气泡图 + 拼接图 双复制（画质优化）</h2>
+  <p class="info">支持高清渲染，保持原始画质</p>
+
+  <input type="file" id="fileInput" accept=".xlsx, .xls" />
+  <div id="results"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const resultsDiv = document.getElementById('results');
+
+    fileInput.addEventListener('change', handleFile);
+
+    async function handleFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      resultsDiv.innerHTML = '<p>🔄 正在处理文件...</p>';
+
+      try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        if (jsonData.length < 2) {
+          resultsDiv.innerHTML = '<p>❌ Excel 中没有足够的数据行。</p>';
+          return;
+        }
+
+        const headers = jsonData[0];
+        const rows = jsonData.slice(1);
+
+        const bubbleIdx = headers.indexOf('bubble_img_url');
+        const urlIndices = [];
+        for (let i = 1; i <= 10; i++) {
+          const idx = headers.indexOf(`url${i}`);
+          if (idx !== -1) urlIndices.push(idx);
+        }
+
+        if (bubbleIdx === -1 && urlIndices.length === 0) {
+          resultsDiv.innerHTML = '<p>❌ 未找到 bubble_img_url 或 url1~url10 列。</p>';
+          return;
+        }
+
+        const metaFields = [
+          '序号', 'spot_id', 'spot_name', 'bubble_img_url',
+          'score', 'feature_tags', 'image_description'
+        ];
+
+        resultsDiv.innerHTML = '';
+
+        for (const row of rows) {
+          const rowObj = {};
+          headers.forEach((h, i) => { rowObj[h] = row[i]; });
+
+          const bubbleUrl = rowObj['bubble_img_url'];
+          const hasBubble = bubbleUrl && typeof bubbleUrl === 'string' && /^https?:\/\//i.test(bubbleUrl);
+
+          const urls = urlIndices
+            .map(i => row[i])
+            .filter(val => val && typeof val === 'string' && /^https?:\/\//i.test(val.trim()))
+            .map(s => s.trim());
+
+          const rowDiv = document.createElement('div');
+          rowDiv.className = 'result-row';
+
+          // === 元信息 ===
+          const metaDiv = document.createElement('div');
+          metaDiv.className = 'meta-info';
+          let metaHTML = '';
+          metaFields.forEach(field => {
+            const value = rowObj[field];
+            if (value && field !== 'bubble_img_url') {
+              metaHTML += `<strong>${field}:</strong> ${value}<br>`;
+            }
+          });
+          metaDiv.innerHTML = metaHTML;
+          rowDiv.appendChild(metaDiv);
+
+          // === 气泡图（高清）===
+          if (hasBubble) {
+            const bubbleSection = document.createElement('div');
+            bubbleSection.className = 'image-section';
+
+            const title = document.createElement('div');
+            title.className = 'section-title';
+            title.textContent = '气泡图（高清）';
+            bubbleSection.appendChild(title);
+
+            const img = document.createElement('img');
+            img.className = 'thumb-img';
+            img.alt = '气泡图';
+            img.crossOrigin = 'anonymous';
+            img.src = bubbleUrl;
+
+            const status = document.createElement('span');
+            status.className = 'status';
+
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.textContent = '📋 复制原图';
+
+            bubbleSection.appendChild(img);
+            bubbleSection.appendChild(btn);
+            bubbleSection.appendChild(status);
+            rowDiv.appendChild(bubbleSection);
+
+            btn.addEventListener('click', async () => {
+              if (!navigator.clipboard?.write) {
+                status.textContent = '❌ 不支持';
+                return;
+              }
+
+              try {
+                // 🔥 关键：使用原始分辨率转 PNG
+                const blob = await urlToHighQualityPng(bubbleUrl);
+                await navigator.clipboard.write([
+                  new ClipboardItem({ 'image/png': blob })
+                ]);
+                status.textContent = '✅ 已复制原图！';
+                status.className = 'status success';
+                setTimeout(() => {
+                  status.textContent = '';
+                  status.className = 'status';
+                }, 2000);
+              } catch (err) {
+                console.error('复制气泡图失败:', err);
+                status.textContent = '❌ 失败';
+              }
+            });
+          }
+
+          // === 拼接图（高清）===
+          if (urls.length > 0) {
+            const images = await loadImages(urls);
+            if (images.length > 0) {
+              // 🔥 提高目标高度 → 更清晰
+              const pngBlob = await combineImagesHighRes(images, 5, 300); // 300px 高度
+
+              const concatSection = document.createElement('div');
+              concatSection.className = 'image-section';
+
+              const title = document.createElement('div');
+              title.className = 'section-title';
+              title.textContent = '拼接图（高清）';
+              concatSection.appendChild(title);
+
+              const canvas = document.createElement('canvas');
+              canvas.className = 'row-canvas';
+
+              const status = document.createElement('span');
+              status.className = 'status';
+
+              const btn = document.createElement('button');
+              btn.className = 'copy-btn';
+              btn.textContent = '📋 复制高清拼接图';
+
+              const bitmap = await createImageBitmap(pngBlob);
+              canvas.width = bitmap.width;
+              canvas.height = bitmap.height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(bitmap, 0, 0);
+              bitmap.close();
+
+              concatSection.appendChild(canvas);
+              concatSection.appendChild(btn);
+              concatSection.appendChild(status);
+              rowDiv.appendChild(concatSection);
+
+              btn.addEventListener('click', async () => {
+                if (!navigator.clipboard?.write) {
+                  status.textContent = '❌ 不支持';
+                  return;
+                }
+
+                try {
+                  await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': pngBlob })
+                  ]);
+                  status.textContent = '✅ 已复制！';
+                  status.className = 'status success';
+                  setTimeout(() => {
+                    status.textContent = '';
+                    status.className = 'status';
+                  }, 2000);
+                } catch (err) {
+                  console.error('复制拼接图失败:', err);
+                  status.textContent = '❌ 失败';
+                }
+              });
+            }
+          }
+
+          resultsDiv.appendChild(rowDiv);
+        }
+
+        if (resultsDiv.children.length === 0) {
+          resultsDiv.innerHTML = '<p>⚠️ 未加载到任何有效图片。</p>';
+        }
+
+      } catch (err) {
+        resultsDiv.innerHTML = `<p style="color:red">❌ 处理失败: ${err.message}</p>`;
+        console.error(err);
+      }
+    }
+
+    // 加载图片（保持原始像素）
+    function loadImages(urls) {
+      const promises = urls.map(url => {
+        return new Promise(resolve => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = url;
+        });
+      });
+      return Promise.all(promises).then(list => list.filter(i => i));
+    }
+
+    // 🔥 高清转换：保持原始分辨率
+    async function urlToHighQualityPng(url) {
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.crossOrigin = 'anonymous';
+        i.onload = () => resolve(i);
+        i.onerror = reject;
+        i.src = url;
+      });
+
+      const canvas = new OffscreenCanvas(img.width, img.height);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0); // 原尺寸绘制
+      return await canvas.convertToBlob({ type: 'image/png' });
+    }
+
+    // 🔥 高清拼接：支持自定义高度（默认 300px）
+    async function combineImagesHighRes(images, gap = 5, targetHeight = 300) {
+      const imgData = images.map(img => {
+        const ratio = targetHeight / img.height;
+        return {
+          img,
+          width: Math.round(img.width * ratio),
+          height: targetHeight
+        };
+      });
+
+      const totalWidth = imgData.reduce((w, item) => w + item.width, 0) + gap * (imgData.length - 1);
+
+      const offCanvas = new OffscreenCanvas(totalWidth, targetHeight);
+      const ctx = offCanvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, totalWidth, targetHeight);
+
+      let x = 0;
+      for (const { img, width, height } of imgData) {
+        ctx.drawImage(img, x, 0, width, height);
+        x += width + gap;
+      }
+
+      return await offCanvas.convertToBlob({ type: 'image/png' });
+    }
+  </script>
+</body>
+</html>
