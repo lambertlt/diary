@@ -332,7 +332,7 @@
           if (urls.length > 0) {
             const images = await loadImages(urls);
             if (images.length > 0) {
-              const pngBlob = await combineImagesHighRes(images, 5, 500); // 300px 高度
+              const pngBlob = await combineImagesHighRes(images, 5, 450); // 300px 高度
               const imageUrl = URL.createObjectURL(pngBlob); // 用于预览
 
               const concatSection = document.createElement('div');
