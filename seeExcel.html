@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh">
 
@@ -701,7 +702,8 @@
                 let defaultExpanded = false;
                 if (this.expanded) {
                     defaultExpanded = true;
-                } else if (this.level === 0 || this.level === 2) {
+					// this.level === 0 || this.level === 2
+                } else if (1) {
                     defaultExpanded = true;
                 }
 
@@ -778,37 +780,47 @@
             },
             template: `
         <div :class="['json-node', level === 0 ? 'root' : '']">
-            <div v-if="isObject" @click="toggleExpand" :class="['json-key', isExpanded ? 'expanded' : '']">
-                {{ keyName }}{{ isArray ? '[' + entries.length + ']' : '{' + entries.length + '}' }}
-            </div>
-            
-            <div v-if="!isObject" class="json-value" :class="[dataType]">
-                <span class="json-key-inline">{{ keyName }}:</span>
-                <!-- 处理包含 ## 的聊天记录 -->
-                <div v-if="dataType === 'string' && data.includes('##')" class="chat-container">
-                    <div v-for="(message, index) in formatChatContent(data)" :key="index" 
-                         :class="['chat-message', 'chat-message-' + message.type]">
-                        <div v-if="message.content.startsWith('<img')" v-html="message.content" @click="() => handleImageClick(message.content)"></div>
-                        <div v-else>{{ message.content }}</div>
-                    </div>
-                </div>
-                <!-- 处理普通字符串 -->
-                <span v-else>{{ getDisplayValue() }}</span>
-                </div>
-                
-                <div v-if="isObject && isExpanded" class="json-children">
-                    <jsonnode 
-                        v-for="([key, value], index) in entries" 
-                        :key="key"
-                        :data="value"
-                        :key-name="key"
-                        :level="level + 1"
-                        :expanded="false"
-                        @open-image="$emit('open-image', $event)"
-                    />
-                </div>
-            </div>
+    <!-- 对象/数组标题 -->
+    <!-- 特殊处理：如果是一个图片 URL 数组 -->
+    <div v-if="isArray && data.length > 0 && typeof data[0] === 'string' && (data[0].startsWith('http') && (data[0].endsWith('.jpg') || data[0].endsWith('.jpeg') || data[0].endsWith('.png') || data[0].endsWith('.gif')))" class="json-value">
+      <span class="json-key-inline">{{ keyName }}:</span>
+      <div class="chat-container">
+        <div v-for="(imgUrl, idx) in data" :key="idx" class="image-container" @click="$emit('open-image', imgUrl)">
+          <img :src="imgUrl" class="upload-img" />
         </div>
+      </div>
+    </div>
+    <div v-else-if="isObject" @click="toggleExpand" :class="['json-key', isExpanded ? 'expanded' : '']">
+      {{ keyName }}{{ isArray ? '[' + entries.length + ']' : '{' + entries.length + '}' }}
+    </div>
+    <!-- 普通非对象值（字符串、数字等） -->
+    <div v-else-if="!isObject" class="json-value" :class="[dataType]">
+      <span class="json-key-inline">{{ keyName }}:</span>
+      <!-- 处理包含 ## 的聊天记录 -->
+      <div v-if="dataType === 'string' && data.includes('##')" class="chat-container">
+        <div v-for="(message, index) in formatChatContent(data)" :key="index" 
+             :class="['chat-message', 'chat-message-' + message.type]">
+          <div v-if="message.content.startsWith('<img')" v-html="message.content" @click="() => handleImageClick(message.content)"></div>
+          <div v-else>{{ message.content }}</div>
+        </div>
+      </div>
+      <!-- 处理普通字符串 -->
+      <span v-else>{{ getDisplayValue() }}</span>
+    </div>
+
+    <!-- 展开的对象/数组内容 -->
+    <div v-if="isObject && isExpanded" class="json-children">
+      <jsonnode 
+        v-for="([key, value], index) in entries" 
+        :key="key"
+        :data="value"
+        :key-name="key"
+        :level="level + 1"
+        :expanded="false"
+        @open-image="$emit('open-image', $event)"
+      />
+    </div>
+  </div>
     `
         };
 
