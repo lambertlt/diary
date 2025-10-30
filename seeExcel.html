@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 
@@ -702,7 +701,7 @@
                 let defaultExpanded = false;
                 if (this.expanded) {
                     defaultExpanded = true;
-					// this.level === 0 || this.level === 2
+                    // this.level === 0 || this.level === 2
                 } else if (1) {
                     defaultExpanded = true;
                 }
@@ -1024,18 +1023,26 @@
                         // 递归处理对象中的每个值
                         function processValue(value) {
                             if (typeof value === 'string') {
-                                try {
-                                    // 尝试解析字符串为JSON对象
-                                    const parsed = JSON.parse(value);
-                                    if (typeof parsed === 'object' && parsed !== null) {
-                                        // 如果是对象，递归处理其属性
-                                        return processObject(parsed);
-                                    }
-                                    return parsed;
-                                } catch (e) {
-                                    // 不是有效的JSON字符串，返回原值
-
+                                if (value.indexOf('waybill_id') >= 0) {
+                                    value = value.replace('waybill_id\": ', 'waybill_id\": \"')
+                                    value = value.replace(', \"dt": ', '\", \"dt\":')
+                                }
+                                if (isPureNumber(value)) {
                                     return value;
+                                } else {
+                                    try {
+                                        // 尝试解析字符串为JSON对象
+                                        const parsed = JSON.parse(value);
+                                        if (typeof parsed === 'object' && parsed !== null) {
+                                            // 如果是对象，递归处理其属性
+                                            return processObject(parsed);
+                                        }
+                                        return parsed;
+                                    } catch (e) {
+                                        // 不是有效的JSON字符串，返回原值
+
+                                        return value;
+                                    }
                                 }
                             } else if (typeof value === 'object' && value !== null) {
                                 return processObject(value);
@@ -1072,17 +1079,25 @@
                         // 递归处理对象中的每个值
                         function processValue(value) {
                             if (typeof value === 'string') {
-                                try {
-                                    // 尝试解析字符串为JSON对象
-                                    const parsed = JSON.parse(value);
-                                    if (typeof parsed === 'object' && parsed !== null) {
-                                        // 如果是对象，递归处理其属性
-                                        return processObject(parsed);
-                                    }
-                                    return parsed;
-                                } catch (e) {
-                                    // 不是有效的JSON字符串，返回原值
+                                if (value.indexOf('waybill_id') >= 0) {
+                                    value = value.replace('waybill_id\": ', 'waybill_id\": \"')
+                                    value = value.replace(', \"dt": ', '\", \"dt\":')
+                                }
+                                if (isPureNumber(value)) {
                                     return value;
+                                } else {
+                                    try {
+                                        // 尝试解析字符串为JSON对象
+                                        const parsed = JSON.parse(value);
+                                        if (typeof parsed === 'object' && parsed !== null) {
+                                            // 如果是对象，递归处理其属性
+                                            return processObject(parsed);
+                                        }
+                                        return parsed;
+                                    } catch (e) {
+                                        // 不是有效的JSON字符串，返回原值
+                                        return value;
+                                    }
                                 }
                             } else if (typeof value === 'object' && value !== null) {
                                 return processObject(value);
@@ -1100,6 +1115,9 @@
                                 }
                                 return result;
                             }
+                        }
+                        function isPureNumber(str) {
+                            return /^\d+$/.test(str);
                         }
 
                         return processValue(selectedItem);
