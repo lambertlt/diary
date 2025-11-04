@@ -1,0 +1,1205 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美团excel作业数据查看器</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 10px 20px;
+        }
+
+        .header {
+            text-align: center;
+            /* margin-bottom: 20px; */
+            padding-bottom: 10px;
+            /* background: #fff; */
+            /* border-radius: 8px; */
+            /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            background: #409eff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #337ecc;
+        }
+
+        .btn.active {
+            background: #2c3e50;
+        }
+
+        .btn-danger {
+            background: #f56c6c;
+        }
+
+        .btn-danger:hover {
+            background: #e65d5d;
+        }
+
+        .btn-upload {
+            background: #67c23a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-upload:hover {
+            background: #5aaf2c;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .content {
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 170px);
+        }
+
+        .list-panel {
+            flex: 1;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .list-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 1px;
+        }
+
+        .view-toggle .btn {
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 0;
+            border: 1px solid #ddd;
+        }
+
+        .view-toggle .btn:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .view-toggle .btn:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+
+        .view-toggle .btn.active {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+
+        .list-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .list-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .list-item:hover {
+            background: #f8f9fa;
+        }
+
+        .list-item.active {
+            background: #e6f7ff;
+            border-left-color: #409eff;
+        }
+
+        .list-item-index {
+            font-weight: 600;
+            color: #666;
+            margin-right: 10px;
+        }
+
+        .detail-panel {
+            flex: 2;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-title {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .detail-body {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .json-view {
+            height: 100%;
+            padding: 15px;
+            overflow: auto;
+            background: #f9f9f9;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .table-view {
+            width: 100%;
+            border-collapse: collapse;
+            height: 100%;
+            overflow: auto;
+            display: block;
+        }
+
+        .table-view th,
+        .table-view td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table-view th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #f8f9fa;
+        }
+
+        .table-view tr:hover {
+            background: #f8f9fa;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            gap: 10px;
+        }
+
+        .page-btn {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .page-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .page-btn.active {
+            background: #409eff;
+            color: white;
+            border-color: #409eff;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .search-box {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            width: 200px;
+        }
+
+        .search-box:focus {
+            border-color: #409eff;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #666;
+            font-style: italic;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #999;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .error-text {
+            color: #f56c6c;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* 在现有样式部分添加 */
+        .json-tree {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .json-node {
+            margin-left: 20px;
+        }
+
+        .json-node.root {
+            margin-left: 0;
+        }
+
+        .json-key {
+            color: #8e44ad;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .json-key::before {
+            content: '▶ ';
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .json-key.expanded::before {
+            transform: rotate(90deg);
+        }
+
+        .json-value {
+            margin-left: 20px;
+        }
+
+        .json-value.string {
+            color: #2c3e50;
+        }
+
+        .json-value.number {
+            color: #137cbd;
+        }
+
+        .json-value.boolean {
+            color: #e74c3c;
+        }
+
+        .json-value.null {
+            color: #7f8c8d;
+        }
+
+        .json-children {
+            transition: all 0.3s ease;
+        }
+
+        /* 在现有样式部分添加 */
+        .chat-message {
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+        }
+
+        .chat-message.customer {
+            background-color: #e3f2fd;
+            margin-left: 20px;
+        }
+
+        .chat-message.staff {
+            background-color: #f5f5f5;
+            margin-right: 20px;
+        }
+
+        .upload-img {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+
+        /* 在现有样式部分添加或修改 */
+        .chat-container {
+            margin-top: 5px;
+        }
+
+        .chat-message {
+            margin: 5px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .chat-message-customer {
+            background-color: #e3f2fd;
+            margin-left: auto;
+            text-align: right;
+            border-bottom-right-radius: 0;
+        }
+
+        .chat-message-staff {
+            background-color: #f5f5f5;
+            margin-right: auto;
+            text-align: left;
+            border-bottom-left-radius: 0;
+        }
+
+        .chat-message-unknown {
+            background-color: #eeeeee;
+            margin: 5px auto;
+            text-align: center;
+        }
+
+        .upload-img {
+            max-width: 100%;
+            max-height: 200px;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: block;
+        }
+
+        /* 在现有样式部分添加 */
+        .modal {
+            display: block;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            position: relative;
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+
+        .image-container {
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .image-container:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="header">
+                <h1>美团excel作业数据查看器</h1>
+            </div>
+
+            <div class="toolbar">
+                <button class="btn" @click="loadSampleData">加载示例数据</button>
+                <button class="btn btn-upload">
+                    上传Excel
+                    <input type="file" class="file-input" accept=".xlsx,.xls" @change="handleFileUpload">
+                </button>
+                <button class="btn btn-danger" @click="clearData">清空数据</button>
+                <div style="flex: 1;"></div>
+                <input type="text" class="search-box" placeholder="搜索..." v-model="searchKeyword" @input="handleSearch">
+            </div>
+
+            <div class="content">
+                <div class="list-panel">
+                    <div class="list-header">
+                        <span>数据列表 (共 {{ filteredData.length }} 条)</span>
+                        <div class="view-toggle">
+                            <button class="btn" :class="{ active: viewMode === 'list' }"
+                                @click="setViewMode('list')">列表视图</button>
+                            <button class="btn" :class="{ active: viewMode === 'table' }"
+                                @click="setViewMode('table')">表格视图</button>
+                        </div>
+                    </div>
+
+                    <div class="list-body" v-show="viewMode === 'list'">
+                        <div v-for="(item, index) in paginatedData" :key="index" class="list-item"
+                            :class="{ active: selectedIndex === index + (currentPage - 1) * pageSize }"
+                            @click="selectItem(index + (currentPage - 1) * pageSize)">
+                            <span class="list-item-index">{{ index + (currentPage - 1) * pageSize + 1 }}</span>
+                            <span>{{ getItemPreview(item) }}</span>
+                        </div>
+                        <div v-if="filteredData.length === 0" class="empty-state">
+                            <div>📭</div>
+                            <div>暂无数据</div>
+                            <div>请上传Excel文件或点击"加载示例数据"</div>
+                        </div>
+                    </div>
+
+                    <div class="list-body" v-show="viewMode === 'table'" style="overflow: auto;">
+                        <table class="table-view" v-if="filteredData.length > 0 && tableHeaders.length > 0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th v-for="header in tableHeaders" :key="header">{{ header }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(item, index) in paginatedData" :key="index"
+                                    :class="{ active: selectedIndex === index + (currentPage - 1) * pageSize }"
+                                    @click="selectItem(index + (currentPage - 1) * pageSize)">
+                                    <td>{{ index + (currentPage - 1) * pageSize + 1 }}</td>
+                                    <td v-for="header in tableHeaders" :key="header"
+                                        v-html="formatCell(paginatedData[index][header],paginatedData,header)">
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div v-else-if="filteredData.length === 0" class="empty-state">
+                            <div>📭</div>
+                            <div>暂无数据</div>
+                            <div>请上传Excel文件或点击"加载示例数据"</div>
+                        </div>
+                    </div>
+
+                    <div class="pagination" v-if="filteredData.length > 0">
+                        <button class="page-btn" :disabled="currentPage === 1" @click="currentPage = 1">首页</button>
+                        <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">上一页</button>
+                        <span class="page-info">
+                            第 {{ currentPage }} 页，共 {{ totalPages }} 页
+                        </span>
+                        <button class="page-btn" :disabled="currentPage === totalPages"
+                            @click="currentPage++">下一页</button>
+                        <button class="page-btn" :disabled="currentPage === totalPages"
+                            @click="currentPage = totalPages">尾页</button>
+                    </div>
+                </div>
+
+                <div class="detail-panel">
+                    <div class="detail-header">
+                        <div class="detail-title">
+                            {{ selectedIndex !== null ? `详情 - 第 ${selectedIndex + 1} 条` : '请选择数据项' }}
+                        </div>
+                        <div>
+                            <button class="btn" @click="copyToClipboard" v-if="selectedIndex !== null">
+                                复制JSON
+                            </button>
+                        </div>
+                    </div>
+                    <!-- 修改 detail-body 部分，添加事件监听 -->
+                    <div class="detail-body">
+                        <div v-if="selectedIndex === null" class="loading">
+                            请在左侧选择一条数据查看详情
+                        </div>
+                        <div v-else class="json-view">
+                            <div class="json-tree">
+                                <jsonnode :data="processedJsonData" :level="0" :expanded="true" key-name="root"
+                                    @open-image="openImageModal" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 模态框移到这里，确保在 Vue 应用内部 -->
+        <div class="modal" v-show="showImageModal" @click="showImageModal = false">
+            <div class="modal-content" @click.stop>
+                <span class="close" @click="showImageModal = false">&times;</span>
+                <img :src="selectedImageSrc" class="modal-image" />
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // 全局图片点击处理函数 - 修复版本
+        window.handleTableImageClick = function (element) {
+            try {
+                const src = element.getAttribute('data-img-src');
+                if (src) {
+                    // 直接通过 Vue 应用实例设置数据
+                    const app = document.getElementById('app').__vue_app__._instance.setupState;
+                    if (app) {
+                        app.selectedImageSrc.value = src;
+                        app.showImageModal.value = true;
+                    }
+                }
+            } catch (error) {
+                console.error('处理图片点击时出错:', error);
+            }
+        };
+        const { createApp, ref, computed, watch, onMounted, nextTick } = Vue;
+
+        // 示例数据
+        const sampleData = [
+            {
+                "id": 1,
+                "name": "张三",
+                "email": "zhangsan@example.com",
+                "age": 28,
+                "active": true,
+                "created_at": "2025-01-15",
+                "city": "北京",
+                "salary": 15000
+            },
+            {
+                "id": 2,
+                "name": "李四",
+                "email": "lisi@example.com",
+                "age": 32,
+                "active": false,
+                "created_at": "2025-02-20",
+                "city": "上海",
+                "salary": 18000
+            },
+            {
+                "id": 3,
+                "name": "王五",
+                "email": "wangwu@example.com",
+                "age": 25,
+                "active": true,
+                "created_at": "2025-03-10",
+                "city": "深圳",
+                "salary": 12000
+            }
+        ];
+
+        const JSONNode = {
+            name: 'jsonnode',
+            props: {
+                data: [Object, Array, String, Number, Boolean],
+                level: Number,
+                keyName: [String, Number],
+                expanded: {
+                    type: Boolean,
+                    default: false
+                }
+            },
+            data() {
+                // 修改这里：根据层级控制默认展开状态
+                // 第0层(根节点)和第2层(第三层)默认展开，第1层(第二层)默认关闭
+                let defaultExpanded = false;
+                if (this.expanded) {
+                    defaultExpanded = true;
+                    // this.level === 0 || this.level === 2
+                } else if (1) {
+                    defaultExpanded = true;
+                }
+
+                return {
+                    isExpanded: defaultExpanded
+                };
+            },
+            computed: {
+                dataType() {
+                    return typeof this.data;
+                },
+                isObject() {
+                    return this.dataType === 'object' && this.data !== null;
+                },
+                isArray() {
+                    return Array.isArray(this.data);
+                },
+                entries() {
+                    if (this.isObject) {
+                        return Object.entries(this.data);
+                    }
+                    return [];
+                }
+            },
+            methods: {
+                toggleExpand() {
+                    if (this.isObject) {
+                        this.isExpanded = !this.isExpanded;
+                    }
+                },
+                getDisplayValue() {
+                    if (this.data === null) return 'null';
+                    if (this.dataType === 'string') return `"${this.data}"`;
+                    if (this.dataType === 'boolean') return this.data.toString();
+                    return this.data;
+                },
+                // 新增方法：处理聊天记录格式的字符串
+                formatChatContent(content) {
+                    if (!content || typeof content !== 'string') return content;
+
+                    if (content.includes('##')) {
+                        const parts = content.split('##');
+                        return parts.map(part => {
+                            const trimmed = part.trim();
+                            if (trimmed.startsWith('CUSTOMER:')) {
+                                return {
+                                    type: 'customer',
+                                    content: trimmed.substring(9).trim() // 去掉 "CUSTOMER:" 前缀
+                                };
+                            } else if (trimmed.startsWith('STAFF:')) {
+                                return {
+                                    type: 'staff',
+                                    content: trimmed.substring(6).trim() // 去掉 "STAFF:" 前缀
+                                };
+                            } else {
+                                return {
+                                    type: 'unknown',
+                                    content: trimmed
+                                };
+                            }
+                        });
+                    }
+                    return content;
+                },
+                // 修改处理图片点击的方法
+                handleImageClick(imgContent) {
+                    // 从图片内容中提取 src
+                    const srcMatch = imgContent.match(/src="([^"]+)"/);
+                    if (srcMatch && srcMatch[1]) {
+                        // 直接触发自定义事件
+                        this.$emit('open-image', srcMatch[1]);
+                    }
+                }
+            },
+            template: `
+        <div :class="['json-node', level === 0 ? 'root' : '']">
+    <!-- 对象/数组标题 -->
+    <!-- 特殊处理：如果是一个图片 URL 数组 -->
+    <div v-if="isArray && data.length > 0 && typeof data[0] === 'string' && (data[0].startsWith('http') && (data[0].endsWith('.jpg') || data[0].endsWith('.jpeg') || data[0].endsWith('.png') || data[0].endsWith('.gif')))" class="json-value">
+      <span class="json-key-inline">{{ keyName }}:</span>
+      <div class="chat-container">
+        <div v-for="(imgUrl, idx) in data" :key="idx" class="image-container" @click="$emit('open-image', imgUrl)">
+          <img :src="imgUrl" class="upload-img" />
+        </div>
+      </div>
+    </div>
+    <div v-else-if="isObject" @click="toggleExpand" :class="['json-key', isExpanded ? 'expanded' : '']">
+     {{ keyName }}{{ isArray ? '[' + entries.length + ']' : '{' + entries.length + '}' }}
+    </div>
+    <!-- 普通非对象值（字符串、数字等） -->
+    <div v-else-if="!isObject" class="json-value" :class="[dataType]">
+      <span class="json-key-inline">{{ keyName }}:</span>
+      <!-- 处理包含 ## 的聊天记录 -->
+      <div v-if="dataType === 'string' && data.includes('##')" class="chat-container">
+        <div v-for="(message, index) in formatChatContent(data)" :key="index" 
+             :class="['chat-message', 'chat-message-' + message.type]">
+          <div v-if="message.content.startsWith('<img')" v-html="message.content" @click="() => handleImageClick(data)"></div>
+          <div v-else>{{ data }}</div>
+        </div>
+      </div>
+	  <div v-else-if="dataType === 'string' && data.includes('https://mss.vip.sankuai.com')" class="image-container"  @click="$emit('open-image',getDisplayValue().replace('&quot;',''))">
+		<img :src="getDisplayValue().replace('&quot;','')" class="upload-img" />
+      </div>
+
+      <!-- 处理普通字符串 -->
+      <span v-else>{{ getDisplayValue() }}</span>
+    </div>
+
+    <!-- 展开的对象/数组内容 -->
+    <div v-if="isObject && isExpanded" class="json-children">
+      <jsonnode 
+        v-for="([key, value], index) in entries" 
+        :key="key"
+        :data="value"
+        :key-name="key"
+        :level="level + 1"
+        :expanded="false"
+        @open-image="$emit('open-image', $event)"
+      />
+    </div>
+  </div>
+    `
+        };
+
+        createApp({
+            components: {
+                jsonnode: JSONNode
+            },
+            setup() {
+                const data = ref([]);
+                const selectedIndex = ref(null);
+                const searchKeyword = ref('');
+                const filteredData = ref([]);
+                const viewMode = ref('list'); // 'list' 或 'table'
+                const currentPage = ref(1);
+                const pageSize = ref(50);
+                const uploadError = ref('');
+                // 新增响应式数据用于图片模态框
+                const showImageModal = ref(false);
+                const selectedImageSrc = ref('');
+
+                // 计算分页数据
+                const totalPages = computed(() => {
+                    return Math.ceil(filteredData.value.length / pageSize.value);
+                });
+
+                const paginatedData = computed(() => {
+                    const start = (currentPage.value - 1) * pageSize.value;
+                    const end = start + pageSize.value;
+                    return filteredData.value.slice(start, end);
+                });
+
+                // 获取表格表头
+                const tableHeaders = computed(() => {
+                    if (data.value.length === 0) return [];
+                    return Object.keys(data.value[0]);
+                });
+
+                // 打开图片模态框的方法
+                const openImageModal = (src) => {
+                    selectedImageSrc.value = src;
+                    showImageModal.value = true;
+                };
+
+                // 关闭图片模态框的方法
+                const closeImageModal = () => {
+                    showImageModal.value = false;
+                };
+
+
+                // 格式化单元格内容
+                // 修改 formatCell 函数
+                const formatCell = (value) => {
+                    if (value === null || value === undefined) return '';
+
+                    if (typeof value === 'string') {
+                        if (value.includes('##')) {
+                            const parts = value.split('##');
+                            let formatted = '';
+                            parts.forEach((part, index) => {
+                                if (part.trim().startsWith('<img')) {
+                                    // 提取图片src并添加点击事件
+                                    const srcMatch = part.match(/src="([^"]+)"/);
+                                    if (srcMatch && srcMatch[1]) {
+                                        // 使用唯一的ID来标识图片
+                                        formatted += `<div class="image-container" data-img-src="${srcMatch[1]}" onclick="handleTableImageClick(this)">${part.trim()}</div>`;
+                                    } else {
+                                        formatted += `<div>${part.trim()}</div>`;
+                                    }
+                         } else {
+                                    const escaped = part.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                                    formatted += `<div>${escaped}</div>`;
+                                }
+                            });
+                            return formatted;
+                        }
+
+                        try {
+                            const parsedValue = JSON.parse(value);
+                            if (typeof parsedValue === 'object' && parsedValue !== null) {
+                                return `<pre>${JSON.stringify(parsedValue, null, 2)}</pre>`;
+                            }
+                        } catch (e) {
+                            // 如果不是有效的JSON或解析失败，直接返回原值
+                        }
+                    }
+
+                    return String(value).replace(/\\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                };
+
+                // 设置视图模式
+                const setViewMode = (mode) => {
+                    viewMode.value = mode;
+                };
+
+                // 加载示例数据
+                const loadSampleData = () => {
+                    data.value = [...sampleData];
+                    filteredData.value = [...sampleData];
+                    selectedIndex.value = null;
+                    currentPage.value = 1;
+                    uploadError.value = '';
+                };
+
+                // 清空数据
+                const clearData = () => {
+                    data.value = [];
+                    filteredData.value = [];
+                    selectedIndex.value = null;
+                    currentPage.value = 1;
+                    uploadError.value = '';
+                };
+
+                // 处理文件上传
+                const handleFileUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    uploadError.value = '';
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const dataBinary = e.target.result;
+                            const workbook = XLSX.read(dataBinary, { type: 'binary' });
+
+                            // 获取第一个工作表
+                            const firstSheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[firstSheetName];
+
+                            // 转换为JSON
+                            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                                raw: true,
+                                defval: null
+                            });
+
+                            if (jsonData.length === 0) {
+                                uploadError.value = 'Excel文件为空';
+                                return;
+                            }
+
+                            data.value = jsonData;
+                            filteredData.value = [...jsonData];
+                            selectedIndex.value = null;
+                            currentPage.value = 1;
+
+                            // 重置文件输入
+                            event.target.value = '';
+
+                        } catch (error) {
+                            console.error('解析Excel文件时出错:', error);
+                            uploadError.value = '文件解析失败，请检查Excel格式';
+                            event.target.value = '';
+                        }
+                    };
+
+                    reader.onerror = () => {
+                        uploadError.value = '文件读取失败';
+                        event.target.value = '';
+                    };
+
+                    reader.readAsBinaryString(file);
+                };
+
+                // 搜索处理
+                const handleSearch = () => {
+                    if (!searchKeyword.value.trim()) {
+                        filteredData.value = [...data.value];
+                    } else {
+                        const keyword = searchKeyword.value.toLowerCase();
+                        filteredData.value = data.value.filter(item => {
+                            return Object.values(item).some(val => {
+                                if (val === null || val === undefined) return false;
+                                return String(val).toLowerCase().includes(keyword);
+                            });
+                        });
+                    }
+                    currentPage.value = 1;
+                };
+
+                // 选择数据项
+                const selectItem = (index) => {
+                    selectedIndex.value = index;
+                };
+
+                // 获取项目预览文本
+                const getItemPreview = (item) => {
+                    if (item.name) return item.name;
+                    if (item.title) return item.title;
+                    if (item.id) return `ID: ${item.id}`;
+                    return JSON.stringify(item).substring(0, 50) + '...';
+                };
+
+                // 格式化JSON
+                const formattedJson = computed(() => {
+                    if (selectedIndex.value === null) return '';
+
+                    try {
+                        const selectedItem = JSON.parse(JSON.stringify(data.value[selectedIndex.value]));
+
+                        // 递归处理对象中的每个值
+                        function processValue(value) {
+                            if (typeof value === 'string') {
+                                if (value.indexOf('waybill_id') >= 0) {
+                                    value = value.replace('waybill_id\": ', 'waybill_id\": \"')
+                                    value = value.replace(', \"dt": ', '\", \"dt\":')
+                                }
+                                if (isPureNumber(value)) {
+                                    return value;
+                                } else {
+                                    try {
+                                        // 尝试解析字符串为JSON对象
+                                        const parsed = JSON.parse(value);
+                                        if (typeof parsed === 'object' && parsed !== null) {
+                                            // 如果是对象，递归处理其属性
+                                            return processObject(parsed);
+                                        }
+                                        return parsed;
+                                    } catch (e) {
+                                        // 不是有效的JSON字符串，返回原值
+
+                                        return value;
+                                    }
+                                }
+                            } else if (typeof value === 'object' && value !== null) {
+                                return processObject(value);
+                            }
+                            return value;
+                        }
+
+                        function processObject(obj) {
+                            if (Array.isArray(obj)) {
+                                return obj.map(item => processValue(item));
+                            } else {
+                                const result = {};
+                                for (const [key, value] of Object.entries(obj)) {
+                                    result[key] = processValue(value);
+                                }
+                                return result;
+                            }
+                        }
+
+                        const processedItem = processValue(selectedItem);
+                        return JSON.stringify(processedItem, null, 2);
+                    } catch (e) {
+                        return String(data.value[selectedIndex.value]);
+                    }
+                });
+
+                // 替换原来的 formattedJson 计算属性
+                const processedJsonData = computed(() => {
+                    if (selectedIndex.value === null) return null;
+
+                    try {
+                        const selectedItem = JSON.parse(JSON.stringify(data.value[selectedIndex.value]));
+
+                        // 递归处理对象中的每个值
+                        function processValue(value) {
+                            if (typeof value === 'string') {
+                                if (value.indexOf('waybill_id') >= 0) {
+                                    value = value.replace('waybill_id\": ', 'waybill_id\": \"')
+                                    value = value.replace(', \"dt": ', '\", \"dt\":')
+                                }
+                                if (isPureNumber(value)) {
+                                    return value;
+                                } else {
+                                    try {
+                                        // 尝试解析字符串为JSON对象
+                                        const parsed = JSON.parse(value);
+                                        if (typeof parsed === 'object' && parsed !== null) {
+                                            // 如果是对象，递归处理其属性
+                                            return processObject(parsed);
+                                        }
+                                        return parsed;
+                                    } catch (e) {
+                                        // 不是有效的JSON字符串，返回原值
+                                        return value;
+                                    }
+                                }
+                            } else if (typeof value === 'object' && value !== null) {
+                                return processObject(value);
+                            }
+                            return value;
+                        }
+
+                        function processObject(obj) {
+                            if (Array.isArray(obj)) {
+                                return obj.map(item => processValue(item));
+                            } else {
+                                const result = {};
+                                for (const [key, value] of Object.entries(obj)) {
+                                    result[key] = processValue(value);
+                                }
+                                return result;
+                            }
+                        }
+                        function isPureNumber(str) {
+                            return /^\d+$/.test(str);
+                        }
+
+                        return processValue(selectedItem);
+                    } catch (e) {
+                        return data.value[selectedIndex.value];
+                    }
+                });
+
+                // 复制到剪贴板
+                const copyToClipboard = () => {
+                    if (selectedIndex.value === null) return;
+
+                    const jsonStr = JSON.stringify(data.value[selectedIndex.value], null, 2);
+                    navigator.clipboard.writeText(jsonStr).then(() => {
+                        alert('已复制到剪贴板！');
+                    }).catch(err => {
+                        console.error('复制失败:', err);
+                        alert('复制失败，请手动复制');
+                    });
+                };
+
+                // 监听选中索引变化
+                watch(selectedIndex, (newVal) => {
+                    if (newVal !== null) {
+                        // 确保索引在有效范围内
+                        if (newVal >= data.value.length) {
+                            selectedIndex.value = data.value.length - 1;
+                        }
+                    }
+                });
+
+                // 监听分页变化
+                watch(currentPage, () => {
+                    // 确保当前页在有效范围内
+                    const maxPage = Math.max(1, totalPages.value);
+                    if (currentPage.value > maxPage) {
+                        currentPage.value = maxPage;
+                    } else if (currentPage.value < 1) {
+                        currentPage.value = 1;
+                    }
+                });
+
+                onMounted(() => {
+                    // 初始加载示例数据
+                    loadSampleData();
+                });
+
+                return {
+                    data,
+                    selectedIndex,
+                    searchKeyword,
+                    filteredData,
+                    viewMode,
+                    currentPage,
+                    pageSize,
+                    totalPages,
+                    paginatedData,
+                    tableHeaders,
+                    uploadError,
+                    formattedJson,
+                    processedJsonData,
+                    showImageModal,
+                    selectedImageSrc,
+                    loadSampleData,
+                    openImageModal,
+                    closeImageModal,
+                    clearData,
+                    handleFileUpload,
+                    handleSearch,
+                    selectItem,
+                    getItemPreview,
+                    copyToClipboard,
+                    setViewMode,
+                    formatCell
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
