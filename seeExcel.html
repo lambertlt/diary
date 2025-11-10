@@ -546,7 +546,7 @@
                     <div class="list-body" v-show="viewMode === 'list'">
                         <div v-for="(item, index) in paginatedData" :key="index" class="list-item"
                             :class="{ active: selectedIndex === index + (currentPage - 1) * pageSize }"
-                            @click="selectItem(index + (currentPage - 1) * pageSize)">
+                            @click="selectItem(item.index + (currentPage - 1) * pageSize)">
                             <span class="list-item-index">{{ index + (currentPage - 1) * pageSize + 1 }}</span>
                             <span>{{ getItemPreview(item) }}</span>
                         </div>
@@ -568,7 +568,7 @@
                             <tbody>
                                 <tr v-for="(item, index) in paginatedData" :key="index"
                                     :class="{ active: selectedIndex === index + (currentPage - 1) * pageSize }"
-                                    @click="selectItem(index + (currentPage - 1) * pageSize)">
+                                    @click="selectItem(item.index + (currentPage - 1) * pageSize)">
                                     <td>{{ index + (currentPage - 1) * pageSize + 1 }}</td>
                                     <td v-for="header in tableHeaders" :key="header"
                                         v-html="formatCell(paginatedData[index][header],paginatedData,header)">
@@ -651,7 +651,7 @@
         const { createApp, ref, computed, watch, onMounted, nextTick } = Vue;
 
         // 示例数据
-        const sampleData = [
+        let sampleData = [
             {
                 "id": 1,
                 "name": "张三",
@@ -917,6 +917,7 @@
 
                 // 加载示例数据
                 const loadSampleData = () => {
+                    sampleData = sampleData.map((item, index) => { item.index = index; return item })
                     data.value = [...sampleData];
                     filteredData.value = [...sampleData];
                     selectedIndex.value = null;
@@ -951,7 +952,7 @@
                             const worksheet = workbook.Sheets[firstSheetName];
 
                             // 转换为JSON
-                            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                            let jsonData = XLSX.utils.sheet_to_json(worksheet, {
                                 raw: true,
                                 defval: null
                             });
@@ -961,6 +962,7 @@
                                 return;
                             }
 
+                            jsonData = jsonData.map((item, index) => { item.index = index; return item })
                             data.value = jsonData;
                             filteredData.value = [...jsonData];
                             selectedIndex.value = null;
