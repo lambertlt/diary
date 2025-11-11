@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh">
 
@@ -567,7 +568,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(item, index) in paginatedData" :key="index"
-                                    :class="{ active: selectedIndex === index + (currentPage - 1) * pageSize }"
+                                    :class="{ active: selectedIndex === item.index + (currentPage - 1) * pageSize }"
                                     @click="selectItem(item.index + (currentPage - 1) * pageSize)">
                                     <td>{{ index + (currentPage - 1) * pageSize + 1 }}</td>
                                     <td v-for="header in tableHeaders" :key="header"
